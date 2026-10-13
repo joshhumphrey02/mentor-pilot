@@ -47,6 +47,291 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/credits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Grant Credits
+         * @description Adds (or removes) mentor-reply credits for a learner or a whole school.
+         */
+        post: operations["grant_credits"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/expo-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Expo Event */
+        post: operations["add_expo_event"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/expo-events/{event_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Expo Event */
+        delete: operations["delete_expo_event"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/mentor-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Mentor Requests */
+        get: operations["list_mentor_requests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/mentor-requests/{request_id}/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assign Mentor */
+        post: operations["assign_mentor"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/mentors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Mentors */
+        get: operations["list_mentors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/mentors/{user_id}/approval": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Set Mentor Approval
+         * @description Approves a mentor to work with learners, or withdraws that approval.
+         */
+        post: operations["set_mentor_approval"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/moderation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Moderation Queue */
+        get: operations["moderation_queue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/moderation/{flag_id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Review Flag */
+        post: operations["review_flag"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/schools": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Schools */
+        get: operations["list_schools"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/schools/{school_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update School */
+        patch: operations["update_school"];
+        trace?: never;
+    };
+    "/api/v1/admin/stages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Stage Definitions */
+        get: operations["list_stage_definitions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/stages/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Update Stage Definition
+         * @description Edits a stage's wording, checklist and mentoring instructions. Takes
+         *     effect on the next message in every project at that stage.
+         */
+        put: operations["update_stage_definition"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Usage Report
+         * @description AI calls, tokens and estimated cost over a period, grouped one way.
+         */
+        get: operations["usage_report"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Users */
+        get: operations["list_users"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update User */
+        patch: operations["update_user"];
+        trace?: never;
+    };
     "/api/v1/attachments/{attachment_id}": {
         parameters: {
             query?: never;
@@ -303,6 +588,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/expo-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Upcoming Expos */
+        get: operations["upcoming_expos"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -358,6 +660,175 @@ export interface paths {
         get: operations["component_photo"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentor-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My Requests
+         * @description A learner's requests, or the requests a mentor has taken on.
+         */
+        get: operations["my_requests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentor-requests/{request_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Request */
+        get: operations["get_request"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentor-requests/{request_id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept Request */
+        post: operations["accept_request"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentor-requests/{request_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel Request */
+        post: operations["cancel_request"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentor-requests/{request_id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Messages */
+        get: operations["list_messages"];
+        put?: never;
+        /**
+         * Send Message
+         * @description A message between learner and mentor. No AI takes part, but every
+         *     message is moderated, and contact details are refused.
+         */
+        post: operations["send_message"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentor-requests/{request_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update Status */
+        post: operations["update_status"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentors/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Mentor Profile */
+        get: operations["my_mentor_profile"];
+        /** Update My Mentor Profile */
+        put: operations["update_my_mentor_profile"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentors/open-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Open Requests
+         * @description Unmatched requests in this mentor's regions that need their expertise.
+         */
+        get: operations["open_requests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentors/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Register Mentor
+         * @description Signs up as a mentor. The account must confirm its email and then be
+         *     approved by an admin before it can see any learner's request.
+         */
+        post: operations["register_mentor"];
         delete?: never;
         options?: never;
         head?: never;
@@ -555,6 +1026,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{project_id}/mentor-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request A Mentor */
+        post: operations["request_a_mentor"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{project_id}/pins": {
         parameters: {
             query?: never;
@@ -738,14 +1226,107 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/users/me/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Usage */
+        get: operations["my_usage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AdminMentorOut */
+        AdminMentorOut: {
+            profile: components["schemas"]["MentorProfileOut"];
+            user: components["schemas"]["AdminUserOut"];
+        };
+        /** AdminSchoolOut */
+        AdminSchoolOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Is Verified */
+            is_verified: boolean;
+            /**
+             * Learners
+             * @default 0
+             */
+            learners: number;
+            /** Name */
+            name: string;
+            /** Province */
+            province: string;
+            /** Town */
+            town: string | null;
+        };
+        /** AdminSchoolUpdate */
+        AdminSchoolUpdate: {
+            /** Is Verified */
+            is_verified: boolean;
+        };
+        /** AdminUserOut */
+        AdminUserOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Email */
+            email: string;
+            /** Full Name */
+            full_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Is Active */
+            is_active: boolean;
+            /** Is Verified */
+            is_verified: boolean;
+            /** Last Login At */
+            last_login_at: string | null;
+            /** Role */
+            role: string;
+        };
+        /** AdminUserUpdate */
+        AdminUserUpdate: {
+            /** Is Active */
+            is_active?: boolean | null;
+            /** Role */
+            role?: ("student" | "mentor" | "school_admin" | "admin") | null;
+        };
         /** AdvanceStageRequest */
         AdvanceStageRequest: {
             /** From Stage */
             from_stage: string;
+        };
+        /** ApproveMentor */
+        ApproveMentor: {
+            /** Approved */
+            approved: boolean;
+        };
+        /** AssignMentor */
+        AssignMentor: {
+            /**
+             * Mentor Id
+             * Format: uuid
+             */
+            mentor_id: string;
         };
         /** AttachmentOut */
         AttachmentOut: {
@@ -769,7 +1350,7 @@ export interface components {
         /** BlockCompleteEvent */
         BlockCompleteEvent: {
             /** Block */
-            block: components["schemas"]["MarkdownBlock"] | components["schemas"]["CalloutBlock"] | components["schemas"]["SuggestedRepliesBlock"] | components["schemas"]["ErrorBlock"] | components["schemas"]["IdeaCardsBlock"] | components["schemas"]["ComparisonTableBlock"] | components["schemas"]["DiagramBlock"] | components["schemas"]["ImageGalleryBlock"] | components["schemas"]["VideoCardsBlock"] | components["schemas"]["ChartBlock"] | components["schemas"]["ChecklistBlock"] | components["schemas"]["ExperimentPlanBlock"] | components["schemas"]["BomTableBlock"] | components["schemas"]["QuizBlock"] | components["schemas"]["CircuitBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["JudgeScorecardBlock"] | components["schemas"]["StageTransitionBlock"];
+            block: components["schemas"]["MarkdownBlock"] | components["schemas"]["CalloutBlock"] | components["schemas"]["SuggestedRepliesBlock"] | components["schemas"]["ErrorBlock"] | components["schemas"]["IdeaCardsBlock"] | components["schemas"]["ComparisonTableBlock"] | components["schemas"]["DiagramBlock"] | components["schemas"]["ImageGalleryBlock"] | components["schemas"]["VideoCardsBlock"] | components["schemas"]["ChartBlock"] | components["schemas"]["ChecklistBlock"] | components["schemas"]["ExperimentPlanBlock"] | components["schemas"]["BomTableBlock"] | components["schemas"]["QuizBlock"] | components["schemas"]["CircuitBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["JudgeScorecardBlock"] | components["schemas"]["MentorHandoffBlock"] | components["schemas"]["StageTransitionBlock"];
             /** Index */
             index: number;
         };
@@ -905,7 +1486,7 @@ export interface components {
             message_start: components["schemas"]["MessageStartEvent"];
             text_delta: components["schemas"]["TextDeltaEvent"];
             tool_status: components["schemas"]["ToolStatusEvent"];
-            usage: components["schemas"]["UsageOut"];
+            usage: components["schemas"]["app__schemas__chat__UsageOut"];
         };
         /**
          * ChecklistBlock
@@ -1140,6 +1721,17 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** CreditGrant */
+        CreditGrant: {
+            /** Delta */
+            delta: number;
+            /** Reason */
+            reason: string;
+            /** School Id */
+            school_id?: string | null;
+            /** User Id */
+            user_id?: string | null;
+        };
         /** DataTableTemplate */
         DataTableTemplate: {
             /**
@@ -1193,6 +1785,13 @@ export interface components {
             confirm: "DELETE";
             /** Password */
             password?: string | null;
+        };
+        /** DeliverableIn */
+        DeliverableIn: {
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
         };
         /** DiagramBlock */
         DiagramBlock: {
@@ -1287,6 +1886,61 @@ export interface components {
              */
             type: "experiment_plan";
         };
+        /** ExpoEventIn */
+        ExpoEventIn: {
+            /**
+             * Location
+             * @default
+             */
+            location: string;
+            /** Name */
+            name: string;
+            /**
+             * Province
+             * @default
+             */
+            province: string;
+            /**
+             * Starts On
+             * Format: date
+             */
+            starts_on: string;
+            /**
+             * Url
+             * @default
+             */
+            url: string;
+        };
+        /** ExpoEventOut */
+        ExpoEventOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Location
+             * @default
+             */
+            location: string;
+            /** Name */
+            name: string;
+            /**
+             * Province
+             * @default
+             */
+            province: string;
+            /**
+             * Starts On
+             * Format: date
+             */
+            starts_on: string;
+            /**
+             * Url
+             * @default
+             */
+            url: string;
+        };
         /** FeedbackRequest */
         FeedbackRequest: {
             /**
@@ -1294,6 +1948,31 @@ export interface components {
              * @enum {integer}
              */
             value: -1 | 0 | 1;
+        };
+        /** FlagOut */
+        FlagOut: {
+            /** Categories */
+            categories: string[];
+            /** Checked */
+            checked: boolean;
+            /** Content */
+            content: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Direction */
+            direction: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Status */
+            status: string;
+            /** User Id */
+            user_id: string | null;
         };
         /** GalleryImage */
         GalleryImage: {
@@ -1506,10 +2185,193 @@ export interface components {
              */
             type: "markdown";
         };
+        /**
+         * MentorHandoffBlock
+         * @description An offer to bring in a human mentor. The learner makes the request
+         *     themselves from this card; the AI only suggests it.
+         */
+        MentorHandoffBlock: {
+            /**
+             * Help Types
+             * @description The kinds of hands-on help needed.
+             */
+            help_types: ("hardware_build" | "lab_access" | "materials" | "coding" | "expo_coaching")[];
+            /**
+             * Reason
+             * @description Why a human mentor would help now, addressed to the learner.
+             */
+            reason: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "mentor_handoff";
+        };
+        /** MentorMessageIn */
+        MentorMessageIn: {
+            /** Text */
+            text: string;
+        };
+        /** MentorMessageOut */
+        MentorMessageOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Mine */
+            mine: boolean;
+            sender: components["schemas"]["Person"] | null;
+            /** Text */
+            text: string;
+        };
+        /** MentorProfileIn */
+        MentorProfileIn: {
+            /**
+             * Availability
+             * @default
+             */
+            availability: string;
+            /**
+             * Bio
+             * @default
+             */
+            bio: string;
+            /** Expertise */
+            expertise: ("hardware_build" | "lab_access" | "materials" | "coding" | "expo_coaching")[];
+            /**
+             * Offers
+             * @default
+             */
+            offers: string;
+            /**
+             * Organisation
+             * @default
+             */
+            organisation: string;
+            /** Regions */
+            regions: string[];
+        };
+        /** MentorProfileOut */
+        MentorProfileOut: {
+            /** Availability */
+            availability: string;
+            /** Bio */
+            bio: string;
+            /** Expertise */
+            expertise: string[];
+            /** Is Approved */
+            is_approved: boolean;
+            /** Offers */
+            offers: string;
+            /** Organisation */
+            organisation: string;
+            /** Regions */
+            regions: string[];
+        };
+        /** MentorRegistration */
+        MentorRegistration: {
+            /**
+             * Accept Privacy
+             * @constant
+             */
+            accept_privacy: true;
+            /**
+             * Availability
+             * @default
+             */
+            availability: string;
+            /**
+             * Bio
+             * @default
+             */
+            bio: string;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Expertise */
+            expertise: ("hardware_build" | "lab_access" | "materials" | "coding" | "expo_coaching")[];
+            /** Full Name */
+            full_name: string;
+            /**
+             * Offers
+             * @default
+             */
+            offers: string;
+            /**
+             * Organisation
+             * @default
+             */
+            organisation: string;
+            /** Password */
+            password: string;
+            /** Regions */
+            regions: string[];
+        };
+        /** MentorRequestIn */
+        MentorRequestIn: {
+            /** Description */
+            description: string;
+            /** Help Types */
+            help_types: ("hardware_build" | "lab_access" | "materials" | "coding" | "expo_coaching")[];
+        };
+        /** MentorRequestOut */
+        MentorRequestOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Description */
+            description: string;
+            /** Help Types */
+            help_types: string[];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            learner: components["schemas"]["Person"];
+            mentor: components["schemas"]["Person"] | null;
+            /**
+             * Project Id
+             * Format: uuid
+             */
+            project_id: string;
+            /** Project Title */
+            project_title: string;
+            /** Province */
+            province: string;
+            /** School Name */
+            school_name: string;
+            /** Snapshot */
+            snapshot: {
+                [key: string]: unknown;
+            };
+            /** Stage Key */
+            stage_key: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "matched" | "in_progress" | "completed" | "cancelled";
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
         /** MessageOut */
         MessageOut: {
             /** Blocks */
-            blocks: (components["schemas"]["MarkdownBlock"] | components["schemas"]["CalloutBlock"] | components["schemas"]["SuggestedRepliesBlock"] | components["schemas"]["ErrorBlock"] | components["schemas"]["IdeaCardsBlock"] | components["schemas"]["ComparisonTableBlock"] | components["schemas"]["DiagramBlock"] | components["schemas"]["ImageGalleryBlock"] | components["schemas"]["VideoCardsBlock"] | components["schemas"]["ChartBlock"] | components["schemas"]["ChecklistBlock"] | components["schemas"]["ExperimentPlanBlock"] | components["schemas"]["BomTableBlock"] | components["schemas"]["QuizBlock"] | components["schemas"]["CircuitBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["JudgeScorecardBlock"] | components["schemas"]["StageTransitionBlock"])[];
+            blocks: (components["schemas"]["MarkdownBlock"] | components["schemas"]["CalloutBlock"] | components["schemas"]["SuggestedRepliesBlock"] | components["schemas"]["ErrorBlock"] | components["schemas"]["IdeaCardsBlock"] | components["schemas"]["ComparisonTableBlock"] | components["schemas"]["DiagramBlock"] | components["schemas"]["ImageGalleryBlock"] | components["schemas"]["VideoCardsBlock"] | components["schemas"]["ChartBlock"] | components["schemas"]["ChecklistBlock"] | components["schemas"]["ExperimentPlanBlock"] | components["schemas"]["BomTableBlock"] | components["schemas"]["QuizBlock"] | components["schemas"]["CircuitBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["JudgeScorecardBlock"] | components["schemas"]["MentorHandoffBlock"] | components["schemas"]["StageTransitionBlock"])[];
             /**
              * Conversation Id
              * Format: uuid
@@ -1610,6 +2472,19 @@ export interface components {
             /** School Id */
             school_id?: string | null;
         };
+        /**
+         * Person
+         * @description The little a mentor and learner see of each other: a first name only.
+         */
+        Person: {
+            /** First Name */
+            first_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+        };
         /** PinIn */
         PinIn: {
             /** Block Index */
@@ -1623,7 +2498,7 @@ export interface components {
         /** PinOut */
         PinOut: {
             /** Block */
-            block: components["schemas"]["MarkdownBlock"] | components["schemas"]["CalloutBlock"] | components["schemas"]["SuggestedRepliesBlock"] | components["schemas"]["ErrorBlock"] | components["schemas"]["IdeaCardsBlock"] | components["schemas"]["ComparisonTableBlock"] | components["schemas"]["DiagramBlock"] | components["schemas"]["ImageGalleryBlock"] | components["schemas"]["VideoCardsBlock"] | components["schemas"]["ChartBlock"] | components["schemas"]["ChecklistBlock"] | components["schemas"]["ExperimentPlanBlock"] | components["schemas"]["BomTableBlock"] | components["schemas"]["QuizBlock"] | components["schemas"]["CircuitBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["JudgeScorecardBlock"] | components["schemas"]["StageTransitionBlock"];
+            block: components["schemas"]["MarkdownBlock"] | components["schemas"]["CalloutBlock"] | components["schemas"]["SuggestedRepliesBlock"] | components["schemas"]["ErrorBlock"] | components["schemas"]["IdeaCardsBlock"] | components["schemas"]["ComparisonTableBlock"] | components["schemas"]["DiagramBlock"] | components["schemas"]["ImageGalleryBlock"] | components["schemas"]["VideoCardsBlock"] | components["schemas"]["ChartBlock"] | components["schemas"]["ChecklistBlock"] | components["schemas"]["ExperimentPlanBlock"] | components["schemas"]["BomTableBlock"] | components["schemas"]["QuizBlock"] | components["schemas"]["CircuitBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["JudgeScorecardBlock"] | components["schemas"]["MentorHandoffBlock"] | components["schemas"]["StageTransitionBlock"];
             /**
              * Created At
              * Format: date-time
@@ -1837,6 +2712,40 @@ export interface components {
             /** Text */
             text: string;
         };
+        /** StageDefinitionOut */
+        StageDefinitionOut: {
+            /** Deliverables */
+            deliverables: components["schemas"]["DeliverableIn"][];
+            /** Exit Criteria */
+            exit_criteria: string[];
+            /** Goal */
+            goal: string;
+            /** Handoff */
+            handoff: boolean;
+            /** Instructions */
+            instructions: string;
+            /** Key */
+            key: string;
+            /** Position */
+            position: number;
+            /** Title */
+            title: string;
+            /** Version */
+            version: number;
+        };
+        /** StageDefinitionUpdate */
+        StageDefinitionUpdate: {
+            /** Deliverables */
+            deliverables: components["schemas"]["DeliverableIn"][];
+            /** Exit Criteria */
+            exit_criteria: string[];
+            /** Goal */
+            goal: string;
+            /** Instructions */
+            instructions: string;
+            /** Title */
+            title: string;
+        };
         /** StageOut */
         StageOut: {
             /** Checklist */
@@ -1878,6 +2787,14 @@ export interface components {
              * @enum {string}
              */
             type: "stage_transition";
+        };
+        /** StatusUpdate */
+        StatusUpdate: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "in_progress" | "completed";
         };
         /** StudentProfileOut */
         StudentProfileOut: {
@@ -1964,10 +2881,18 @@ export interface components {
             /** Tool */
             tool: string;
         };
-        /** UsageOut */
-        UsageOut: {
+        /** UsageRow */
+        UsageRow: {
+            /** Calls */
+            calls: number;
+            /** Cost Usd */
+            cost_usd: string | null;
             /** Input Tokens */
             input_tokens: number;
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
             /** Output Tokens */
             output_tokens: number;
         };
@@ -2050,6 +2975,27 @@ export interface components {
             /** Videos */
             videos: components["schemas"]["VideoCard"][];
         };
+        /** UsageOut */
+        app__schemas__chat__UsageOut: {
+            /** Input Tokens */
+            input_tokens: number;
+            /** Output Tokens */
+            output_tokens: number;
+        };
+        /**
+         * UsageOut
+         * @description How much of this month's free mentoring a learner has used.
+         */
+        app__schemas__mentoring__UsageOut: {
+            /** Extra Credits */
+            extra_credits: number;
+            /** Free Per Month */
+            free_per_month: number;
+            /** Remaining */
+            remaining: number;
+            /** Used This Month */
+            used_this_month: number;
+        };
     };
     responses: never;
     parameters: never;
@@ -2129,6 +3075,794 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TestChatResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    grant_credits: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreditGrant"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_expo_event: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExpoEventIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExpoEventOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_expo_event: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_mentor_requests: {
+        parameters: {
+            query?: {
+                status?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MentorRequestOut"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assign_mentor: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignMentor"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MentorRequestOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_mentors: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMentorOut"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    set_mentor_approval: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApproveMentor"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMentorOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    moderation_queue: {
+        parameters: {
+            query?: {
+                status?: "open" | "reviewed";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FlagOut"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    review_flag: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                flag_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FlagOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_schools: {
+        parameters: {
+            query?: {
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminSchoolOut"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_school: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                school_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminSchoolUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminSchoolOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_stage_definitions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StageDefinitionOut"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    update_stage_definition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StageDefinitionUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StageDefinitionOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    usage_report: {
+        parameters: {
+            query?: {
+                group_by?: "day" | "user" | "school" | "provider";
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageRow"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_users: {
+        parameters: {
+            query?: {
+                q?: string;
+                role?: ("student" | "mentor" | "school_admin" | "admin") | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUserOut"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_user: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminUserUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUserOut"];
                 };
             };
             /** @description Unauthorized */
@@ -3108,6 +4842,53 @@ export interface operations {
             };
         };
     };
+    upcoming_expos: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExpoEventOut"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     health: {
         parameters: {
             query?: never;
@@ -3259,6 +5040,641 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_requests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MentorRequestOut"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_request: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MentorRequestOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    accept_request: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MentorRequestOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_request: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MentorRequestOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_messages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MentorMessageOut"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    send_message: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MentorMessageIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MentorMessageOut"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatusUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MentorRequestOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_mentor_profile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MentorProfileOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    update_my_mentor_profile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MentorProfileIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MentorProfileOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    open_requests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MentorRequestOut"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    register_mentor: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MentorRegistration"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4100,6 +6516,77 @@ export interface operations {
             };
         };
     };
+    request_a_mentor: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MentorRequestIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MentorRequestOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_pins: {
         parameters: {
             query?: never;
@@ -4693,6 +7180,53 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_usage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__schemas__mentoring__UsageOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };

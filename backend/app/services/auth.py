@@ -76,7 +76,7 @@ async def _consume_email_token(session: AsyncSession, raw: str, purpose: EmailTo
     return user
 
 
-async def _send_verification(
+async def send_verification(
     session: AsyncSession, settings: Settings, mailer: Mailer, user: User
 ) -> None:
     raw = await _issue_email_token(
@@ -118,7 +118,7 @@ async def register(
                 )
             )
         else:
-            await _send_verification(session, settings, mailer, existing)
+            await send_verification(session, settings, mailer, existing)
             await session.commit()
         return
 
@@ -131,7 +131,7 @@ async def register(
     )
     session.add(user)
     await session.flush()
-    await _send_verification(session, settings, mailer, user)
+    await send_verification(session, settings, mailer, user)
     audit.record(session, "auth.registered", user_id=user.id, method="password")
     await session.commit()
 
@@ -142,7 +142,7 @@ async def resend_verification(
     user = await get_user_by_email(session, email_address)
     if user is None or user.is_verified or not user.is_active:
         return
-    await _send_verification(session, settings, mailer, user)
+    await send_verification(session, settings, mailer, user)
     await session.commit()
 
 

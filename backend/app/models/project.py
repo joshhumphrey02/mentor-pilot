@@ -123,8 +123,9 @@ class ModerationFlag(UUIDPrimaryKeyMixin, Base):
     message_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("messages.id", ondelete="SET NULL")
     )
-    # "input": the learner's message. "output": the mentor's reply.
-    direction: Mapped[str] = mapped_column(String(10))
+    # "input": the learner's message. "output": the AI mentor's reply.
+    # "mentor_chat": a message between a learner and a human mentor.
+    direction: Mapped[str] = mapped_column(String(20))
     categories: Mapped[list[str]] = mapped_column(JSONB, default=list, server_default=text("'[]'"))
     # False when the message was blocked because the check itself failed.
     checked: Mapped[bool] = mapped_column(default=True, server_default=text("true"))

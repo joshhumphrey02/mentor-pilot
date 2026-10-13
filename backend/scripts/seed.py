@@ -17,7 +17,7 @@ from app.core.time import utcnow
 from app.db.session import create_engine, create_session_factory
 from app.models import School, StudentProfile, User, UserRole
 from app.schemas.user import SchoolCreate
-from app.services import schools
+from app.services import mentoring, schools
 from app.services.auth import get_user_by_email
 
 logger = structlog.get_logger(__name__)
@@ -65,9 +65,17 @@ async def seed(session: AsyncSession) -> None:
     await _user(
         session, email="admin@demo.example.com", full_name="Demo Admin", role=UserRole.ADMIN
     )
-    await _user(
+    mentor = await _user(
         session, email="mentor@demo.example.com", full_name="Demo Mentor", role=UserRole.MENTOR
     )
+    profile = await mentoring.get_profile(session, mentor)
+    if not profile.expertise:
+        profile.organisation = "Cape Town Makerspace"
+        profile.bio = "Electronics hobbyist and former expo judge."
+        profile.expertise = ["hardware_build", "coding", "expo_coaching"]
+        profile.regions = ["Western Cape"]
+        profile.availability = "Saturday mornings"
+        profile.is_approved = True
     student = await _user(
         session, email="student@demo.example.com", full_name="Thandi Mokoena", role=UserRole.STUDENT
     )

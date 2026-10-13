@@ -1,6 +1,14 @@
 """Importing this package registers every model on `Base.metadata`."""
 
 from app.models.ai_usage import AIUsage
+from app.models.mentoring import (
+    CreditLedger,
+    ExpoEvent,
+    MentorMessage,
+    MentorProfile,
+    MentorRequest,
+    RequestStatus,
+)
 from app.models.pathway import ProjectStage, StageDefinition, StageStatus
 from app.models.project import (
     Conversation,
@@ -21,10 +29,15 @@ __all__ = [
     "Attachment",
     "AuditLog",
     "Conversation",
+    "CreditLedger",
     "EmailToken",
     "EmailTokenPurpose",
     "ExperimentDataset",
+    "ExpoEvent",
     "LogbookEntry",
+    "MentorMessage",
+    "MentorProfile",
+    "MentorRequest",
     "Message",
     "MessageRole",
     "MessageStatus",
@@ -34,6 +47,7 @@ __all__ = [
     "ProjectStage",
     "ProjectStatus",
     "RefreshToken",
+    "RequestStatus",
     "School",
     "StageDefinition",
     "StageStatus",

@@ -387,6 +387,27 @@ class JudgeScorecardBlock(BaseModel):
     ]
 
 
+HelpType = Literal["hardware_build", "lab_access", "materials", "coding", "expo_coaching"]
+
+
+class MentorHandoffBlock(BaseModel):
+    """An offer to bring in a human mentor. The learner makes the request
+    themselves from this card; the AI only suggests it."""
+
+    type: Literal["mentor_handoff"] = "mentor_handoff"
+    help_types: Annotated[
+        list[HelpType],
+        Field(min_length=1, max_length=5, description="The kinds of hands-on help needed."),
+    ]
+    reason: Annotated[
+        str,
+        Field(
+            max_length=400,
+            description="Why a human mentor would help now, addressed to the learner.",
+        ),
+    ]
+
+
 class StageTransitionBlock(BaseModel):
     """A proposal to move on. The learner confirms it in the UI; nothing changes
     until they do. Once the project is at `to_stage` the card becomes a celebration."""
@@ -417,6 +438,7 @@ Block = Annotated[
     | CircuitBlock
     | ImageBlock
     | JudgeScorecardBlock
+    | MentorHandoffBlock
     | StageTransitionBlock,
     Field(discriminator="type"),
 ]

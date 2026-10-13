@@ -90,6 +90,12 @@ class Settings(BaseSettings):
     # Sent with requests to Wikimedia, whose API policy asks for a contact address.
     contact_email: str = "admin@example.com"
 
+    # --- Usage and billing groundwork ------------------------------------------
+    # Mentor replies each learner gets free per calendar month.
+    free_turns_per_month: int = 200
+    # Off until a payment gateway exists: usage is shown, never blocked.
+    enforce_credits: bool = False
+
     # --- Rate limits (slowapi syntax) ---------------------------------------
     rate_limit_enabled: bool = True
     rate_limit_auth: str = "10/minute"

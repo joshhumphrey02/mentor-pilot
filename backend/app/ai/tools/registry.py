@@ -4,6 +4,7 @@ from typing import Any
 
 from app.ai.tools.base import Tool
 from app.ai.tools.circuit import render_circuit
+from app.ai.tools.handoff import request_human_mentor
 from app.ai.tools.ideas import compare_ideas, propose_project_ideas, select_idea
 from app.ai.tools.judge import judge_practice
 from app.ai.tools.media import search_images, search_videos
@@ -33,6 +34,7 @@ ALL_TOOLS: tuple[Tool[Any], ...] = (
     create_experiment_plan,
     quiz_me,
     judge_practice,
+    request_human_mentor,
 )
 
 # How many times the model may call tools and continue within one turn. A cap

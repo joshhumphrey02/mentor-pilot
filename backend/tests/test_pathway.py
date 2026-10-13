@@ -10,7 +10,7 @@ from app.ai.providers.base import ProviderError
 from app.ai.providers.fake import FakeProvider
 from app.ai.tools.registry import MAX_TOOL_ROUNDS
 from app.ai.types import ChatMessage, ToolCall
-from app.models import AIUsage, Message, Project, ProjectStage, StageDefinition, User
+from app.models import AIUsage, Message, Project, ProjectStage, User
 from app.services import chat as chat_module
 from app.services import pathway
 from tests.conftest import csrf, login_as, make_client, make_user
@@ -83,7 +83,7 @@ def test_the_shipped_pathway_is_well_formed() -> None:
 
 
 async def test_definitions_are_seeded_once_and_then_left_alone(db: AsyncSession) -> None:
-    first = (await db.scalars(select(StageDefinition))).all()
+    first = await pathway.definitions(db)
     assert len(first) == 9
     first[0].title = "Edited by an admin"
     await db.commit()
