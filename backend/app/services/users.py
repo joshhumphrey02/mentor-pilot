@@ -10,7 +10,17 @@ from app.core.config import Settings
 from app.core.errors import AppError, PermissionDeniedError
 from app.core.security import verify_password
 from app.core.time import utcnow
-from app.models import AuditLog, EmailToken, StudentProfile, User, UserRole
+from app.models import (
+    AuditLog,
+    Conversation,
+    EmailToken,
+    Message,
+    ModerationFlag,
+    Project,
+    StudentProfile,
+    User,
+    UserRole,
+)
 from app.schemas.user import OnboardingRequest, UserUpdate
 from app.services import audit, email, schools, sessions
 from app.services.email import Mailer
@@ -109,6 +119,7 @@ async def export_data(session: AsyncSession, user: User) -> dict[str, Any]:
     events = await session.scalars(
         select(AuditLog).where(AuditLog.user_id == user.id).order_by(AuditLog.created_at)
     )
+    exported_projects = await _export_projects(session, user)
     audit.record(session, "user.data_exported", user_id=user.id)
     await session.commit()
 
@@ -146,11 +157,57 @@ async def export_data(session: AsyncSession, user: User) -> dict[str, Any]:
             "guardian_email": profile.guardian_email,
             "guardian_consent_at": _iso(profile.guardian_consent_at),
         },
+        "projects": exported_projects,
         "activity": [
             {"action": event.action, "at": _iso(event.created_at), "details": event.details}
             for event in events
         ],
     }
+
+
+async def _export_projects(session: AsyncSession, user: User) -> list[dict[str, Any]]:
+    projects = await session.scalars(
+        select(Project).where(Project.owner_id == user.id).order_by(Project.created_at)
+    )
+    exported: list[dict[str, Any]] = []
+    for project in projects:
+        conversations = await session.scalars(
+            select(Conversation)
+            .where(Conversation.project_id == project.id)
+            .order_by(Conversation.created_at)
+        )
+        chats: list[dict[str, Any]] = []
+        for conversation in conversations:
+            messages = await session.scalars(
+                select(Message)
+                .where(Message.conversation_id == conversation.id)
+                .order_by(Message.seq)
+            )
+            chats.append(
+                {
+                    "title": conversation.title,
+                    "created_at": _iso(conversation.created_at),
+                    "messages": [
+                        {
+                            "role": message.role,
+                            "at": _iso(message.created_at),
+                            "blocks": message.blocks,
+                        }
+                        for message in messages
+                    ],
+                }
+            )
+        exported.append(
+            {
+                "title": project.title,
+                "stage": project.current_stage,
+                "status": project.status,
+                "idea": project.idea,
+                "created_at": _iso(project.created_at),
+                "conversations": chats,
+            }
+        )
+    return exported
 
 
 def _iso(value: Any) -> str | None:
@@ -170,6 +227,9 @@ async def delete_account(session: AsyncSession, user: User, *, password: str | N
     await session.execute(delete(EmailToken).where(EmailToken.user_id == user.id))
     # Audit details can hold personal data; the deletion itself is still recorded below.
     await session.execute(delete(AuditLog).where(AuditLog.user_id == user.id))
+    # Cascades to their conversations and messages.
+    await session.execute(delete(Project).where(Project.owner_id == user.id))
+    await session.execute(delete(ModerationFlag).where(ModerationFlag.user_id == user.id))
     if user.student_profile is not None:
         await session.delete(user.student_profile)
         user.student_profile = None

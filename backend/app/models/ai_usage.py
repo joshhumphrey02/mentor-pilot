@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, Numeric, String, Uuid, text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, Numeric, String, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, UUIDPrimaryKeyMixin
@@ -25,8 +25,9 @@ class AIUsage(UUIDPrimaryKeyMixin, Base):
     school_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("schools.id", ondelete="SET NULL")
     )
-    # Becomes a foreign key when projects arrive in the next migration.
-    project_id: Mapped[uuid.UUID | None] = mapped_column(Uuid, index=True)
+    project_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("projects.id", ondelete="SET NULL"), index=True
+    )
 
     provider: Mapped[str] = mapped_column(String(30), index=True)
     model: Mapped[str] = mapped_column(String(100))

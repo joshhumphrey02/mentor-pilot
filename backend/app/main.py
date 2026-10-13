@@ -20,6 +20,7 @@ from app.core.middleware import RequestContextMiddleware, SecurityHeadersMiddlew
 from app.core.rate_limit import register_rate_limiter
 from app.core.spa import mount_spa
 from app.db.session import create_engine, create_session_factory
+from app.services.chat import ChatService
 from app.services.email import build_email_sender
 from app.services.google_oauth import HttpxGoogleOAuthClient
 
@@ -44,10 +45,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.engine = engine
         app.state.session_factory = create_session_factory(engine)
         app.state.ai.bind(app.state.session_factory)
+        app.state.chat.bind(app.state.session_factory)
         logger.info("app.started", environment=settings.environment, version=__version__)
         try:
             yield
         finally:
+            await app.state.chat.shutdown()
             await engine.dispose()
 
     app = FastAPI(
@@ -69,6 +72,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
 
     app.state.ai = AIService(settings, ProviderRegistry(settings))
+    app.state.chat = ChatService(app.state.ai)
 
     register_error_handlers(app)
     register_rate_limiter(app)
