@@ -38,3 +38,48 @@ where the tooling forced a deviation. Newest phase last.
 - **`make build` was not run during development** (project rule: no builds
   unless asked). SPA serving is covered by backend tests against a stand-in
   static directory instead.
+
+## Phase 2: Auth and onboarding
+
+- **Registration never reveals whether an email is taken.** It always answers
+  "check your inbox"; an existing verified user gets an "you already have an
+  account" email instead. Forgot-password and resend-verification behave the
+  same way.
+- **Login is refused until the email is verified.** Clicking the emailed link
+  both verifies and signs in, so the learner lands straight in onboarding.
+- **Lockout returns a distinct 423 "try again in N minutes".** This does reveal
+  that the account exists, but only after five rate-limited attempts, and a
+  silent lockout would leave a learner unable to tell why their correct password
+  fails.
+- **Refresh-token reuse has a 10-second grace window.** Two tabs can refresh at
+  once; the loser gets a 409 and retries with the cookies the winner already
+  set. Reuse outside the window revokes the whole token family.
+- **CSRF tokens are signed** (HMAC of a random nonce), not just compared, so a
+  cookie planted from a sibling subdomain cannot pass the double-submit check.
+  The check applies to every state-changing `/api` request that carries an auth
+  cookie, including `/auth/refresh` and `/auth/logout`.
+- **Google sign-in uses Authlib for PKCE and state, and plain httpx for the
+  token exchange.** Authlib's own httpx integration is deprecated upstream. The
+  profile is read from Google's userinfo endpoint over TLS rather than by
+  validating an ID token locally.
+- **OAuth state lives in a signed, httpOnly cookie** scoped to the callback
+  path, so no server-side session store is needed.
+- **Guardian consent is a recorded flag plus an email address**, as the spec
+  asks, and the guardian is sent a notice with a link to the privacy notice.
+  It is not a verified opt-in (the guardian does not have to click anything).
+  Worth revisiting with legal advice before a real launch.
+- **Date of birth, consent and the privacy notice are collected in onboarding**
+  (the privacy tick is also required at registration; Google sign-ups accept it
+  in onboarding). Guardian details are discarded for adults.
+- **Account deletion anonymises the user row instead of dropping it**, so usage
+  and billing records can still reference it. The profile, tokens and audit
+  history are deleted. It is a `POST /users/me/delete` (not `DELETE`) because
+  it needs a body with the typed confirmation and password.
+- **Self-registration creates learners only.** Mentor sign-up arrives with the
+  mentor side in Phase 8; admins are created by the seed script.
+- **Provinces, grades and interests are not database enums.** They are short
+  strings validated for length, with the option lists living in the frontend,
+  so expanding beyond South African high schools needs no migration.
+- **Rate limits are per IP address** and stored in Redis when `REDIS_URL` is
+  set, in memory otherwise. In-memory limits are per process, so set
+  `REDIS_URL` when running more than one worker.

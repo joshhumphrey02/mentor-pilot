@@ -11,10 +11,15 @@ from fastapi.routing import APIRoute
 from app import __version__
 from app.api.v1.router import api_router
 from app.core.config import Settings, get_settings
+from app.core.csrf import CSRFMiddleware
+from app.core.errors import register_error_handlers
 from app.core.logging import configure_logging
 from app.core.middleware import RequestContextMiddleware, SecurityHeadersMiddleware
+from app.core.rate_limit import register_rate_limiter
 from app.core.spa import mount_spa
 from app.db.session import create_engine, create_session_factory
+from app.services.email import build_email_sender
+from app.services.google_oauth import HttpxGoogleOAuthClient
 
 API_PREFIX = "/api/v1"
 
@@ -53,6 +58,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.dependency_overrides[get_settings] = lambda: settings
 
+    app.state.settings = settings
+    # External collaborators live on app.state so tests can swap in fakes.
+    app.state.email_sender = build_email_sender(settings)
+    app.state.google_oauth = (
+        HttpxGoogleOAuthClient(settings) if settings.google_oauth_enabled else None
+    )
+
+    register_error_handlers(app)
+    register_rate_limiter(app)
+
     if settings.is_dev:
         app.add_middleware(
             CORSMiddleware,
@@ -61,6 +76,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             allow_methods=["*"],
             allow_headers=["*"],
         )
+    app.add_middleware(CSRFMiddleware, settings=settings)
     app.add_middleware(SecurityHeadersMiddleware, settings=settings)
     # Added last so it is outermost: every response, including errors raised by
     # other middleware, carries a request id and is logged.
