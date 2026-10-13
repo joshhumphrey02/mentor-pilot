@@ -1,0 +1,220 @@
+# The project pathway: the nine stages every project moves through.
+#
+# This file is the starting content. It is loaded into the `stage_definitions`
+# table the first time the app starts with that table empty; after that the
+# table is the source of truth and admins edit it there, with no code change.
+# Bump `version` when you change this file so the change is traceable.
+#
+# For each stage:
+#   goal           one sentence the learner sees
+#   deliverables   the checklist; the mentor or the learner can tick each item
+#   exit_criteria  what the mentor checks before suggesting the next stage
+#   instructions   added to the mentor's system prompt while in this stage
+#   handoff        true where a human mentor is offered
+
+version: 1
+
+stages:
+  - key: problem_discovery
+    title: Problem Discovery
+    goal: Find a real problem in your community, school or home that is worth solving.
+    deliverables:
+      - { key: observations, label: List at least three problems you have noticed around you }
+      - { key: affected, label: "Say who each problem affects, and how" }
+      - { key: chosen_problem, label: Pick the one problem you care most about }
+      - { key: why_it_matters, label: Explain in your own words why it matters }
+    exit_criteria:
+      - The learner has named one specific problem, not a broad topic.
+      - The learner can say who is affected and why it matters to them personally.
+      - The problem is something a school learner could investigate safely.
+    instructions: |
+      Help the learner notice problems in their own life before any solution is discussed.
+      Ask about their home, school, street, transport, water, electricity, food, health and
+      safety. Draw on their listed interests and where they live. Good expo projects start
+      from something the learner has actually seen, so favour a small, real, local problem
+      over a grand one ("our school tap leaks" over "the global water crisis").
+
+      Do not propose project ideas yet, even if asked: that is the next stage, and a problem
+      chosen first makes the idea stronger. If the learner arrives with an idea already, work
+      backwards with them to the problem it solves.
+
+  - key: idea_development
+    title: Idea Development
+    goal: Come up with several ways to tackle your problem, compare them, and choose one.
+    deliverables:
+      - { key: several_ideas, label: Explore at least three different project ideas }
+      - { key: compared, label: "Compare them on cost, difficulty, time and safety" }
+      - { key: chosen_idea, label: Choose one idea and say why }
+    exit_criteria:
+      - The learner has looked at more than one idea.
+      - The learner has chosen an idea themselves and can explain the choice.
+      - The idea is affordable, safe and doable in the time they have.
+    instructions: |
+      Use the propose_project_ideas tool to show three to six idea cards that address the
+      learner's chosen problem. Make them genuinely different from each other (an
+      investigation, a build, a survey, a comparison of existing solutions), and realistic
+      for their grade, budget and the materials they can get. Be honest in the difficulty,
+      cost and safety fields.
+
+      When the learner is weighing a shortlist, use compare_ideas. Let them choose: give
+      your honest view if asked, with reasons, but never choose for them. When they clearly
+      commit to one idea, call select_idea.
+
+  - key: research_question
+    title: Research Question
+    goal: Turn your idea into one focused question you can test, or one clear engineering goal.
+    deliverables:
+      - { key: background, label: Find out what is already known about your topic }
+      - { key: draft_question, label: Write a first draft of your question or goal }
+      - { key: testable, label: Check that it can be measured or tested }
+      - { key: final_question, label: Write your final research question or engineering goal }
+    exit_criteria:
+      - The question or goal is written in the learner's own words.
+      - It names what will be changed or built and what will be measured.
+      - It is narrow enough to answer with the time and equipment available.
+    instructions: |
+      First find out whether this is a scientific investigation (it asks a question and tests
+      it) or an engineering project (it builds something to meet a need). Both are valid at
+      expos, and they are judged differently.
+
+      The question must be the learner's own. Do not write it for them. Ask them for a
+      draft, then improve it together by asking what they would measure, how, and with what.
+      Show an example of a weak question becoming a strong one on a different topic. A good
+      test: "Could you answer this with numbers you collect yourself?"
+
+  - key: method
+    title: Method
+    goal: Plan a fair test, or a design process, that will actually answer your question.
+    deliverables:
+      - { key: approach, label: Decide between the scientific method and the engineering design process }
+      - { key: variables, label: "Identify what you will change, what you will measure, and what you will keep the same" }
+      - { key: hypothesis, label: Write your hypothesis or your design requirements }
+      - { key: procedure, label: Write step-by-step what you will do }
+      - { key: safety_check, label: List the risks and how you will stay safe }
+    exit_criteria:
+      - The learner can name their independent, dependent and controlled variables (or their requirements, constraints and success criteria).
+      - There is a written procedure someone else could follow.
+      - Safety risks have been considered and an adult is involved where needed.
+    instructions: |
+      For a scientific investigation, guide the learner to a hypothesis, the three kinds of
+      variable, a control, and enough repeated trials to trust the result. For an engineering
+      project, guide them to requirements, constraints, and criteria for success they can
+      measure.
+
+      Use create_experiment_plan to lay out variables and a data table once the learner has
+      told you what they will change and measure. Fill it from what they said; leave the
+      hypothesis for them to write. Use quiz_me to check they understand fair testing before
+      moving on. Raise safety here, plainly, before anything is built.
+
+  - key: ai_digital_tools
+    title: AI and Digital Tools
+    goal: Decide which digital tools will help, and how you will use them honestly.
+    deliverables:
+      - { key: tools_chosen, label: Choose the tools you will use (for example a spreadsheet, a simulator or code) }
+      - { key: tool_purpose, label: Say what each tool is for in your project }
+      - { key: ai_use_plan, label: Write down how you will use AI and how you will record it }
+    exit_criteria:
+      - The learner has chosen tools that are free or already available to them.
+      - The learner understands that AI use must be declared and that the thinking must be theirs.
+    instructions: |
+      Help the learner pick tools that work on what they have, which is often only a phone:
+      a spreadsheet for data, a free circuit or physics simulator, block or text coding, a
+      phone camera or sensors for measuring, free CAD or drawing apps. Recommend free tools
+      and say what each is good for.
+
+      Talk straightforwardly about AI. It is a legitimate tool for research, coding help,
+      design and data analysis, and judges will ask how it was used. Encourage a short
+      "how I used AI" note in the logbook. Simulation is also a good, safe substitute when
+      the real experiment would be dangerous or too expensive.
+
+  - key: design_prototyping
+    title: Design and Prototyping
+    goal: Design what you will build, list what you need, and plan how to build it.
+    handoff: true
+    deliverables:
+      - { key: sketch, label: Sketch your design or your experimental setup }
+      - { key: materials, label: List your materials and what they cost }
+      - { key: build_plan, label: Write a step-by-step build plan }
+      - { key: mentor_plan, label: Decide who will help you with the hands-on building }
+    exit_criteria:
+      - There is a sketch or diagram of the design or setup.
+      - There is a bill of materials that fits the learner's budget.
+      - The learner knows who will supervise or help with practical work.
+    instructions: |
+      This is where the project becomes physical, and where a human mentor matters most.
+      Use render_diagram for system layouts and process flows, build_bill_of_materials for
+      the parts list with rand prices and cheaper substitutes, and search_images so the
+      learner can recognise real components.
+
+      Keep everything low-voltage and low-risk. Check the design against the safety rules
+      before encouraging any building. Tell the learner clearly that hands-on work should
+      be supervised, and that Mentor Pilot can connect them with a human mentor for
+      building, lab access or materials. Suggest that once the design and materials list
+      are ready.
+
+  - key: testing_analysis
+    title: Testing and Data Analysis
+    goal: Run your tests, record what happens, and work out what your results mean.
+    deliverables:
+      - { key: trials_done, label: Run your trials and record every result }
+      - { key: data_table, label: Put your results in a table }
+      - { key: graph, label: Draw a graph of your results }
+      - { key: conclusion, label: Write what your results show }
+      - { key: limitations, label: Note what went wrong or could be better }
+    exit_criteria:
+      - The learner has real data they collected themselves.
+      - The data has been shown in a table and a suitable graph.
+      - The learner has stated a conclusion in their own words and at least one limitation.
+    instructions: |
+      Only work with data the learner gives you. Never invent, estimate or "tidy up"
+      results: made-up data is the most serious thing a judge can find. If the results are
+      messy or disagree with the hypothesis, say that this is normal and interesting, and
+      help the learner think about why.
+
+      Use render_chart to plot their numbers, choosing the chart type that fits (a line for
+      change over a continuous quantity, bars for categories, scatter for a relationship).
+      Ask the learner what they see in the graph before telling them what you see. The
+      conclusion must be theirs: offer sentence starters, not sentences.
+
+  - key: technical_communication
+    title: Technical Communication
+    goal: Write up your project so that anyone can understand what you did and found.
+    deliverables:
+      - { key: logbook, label: Bring your logbook up to date }
+      - { key: report, label: Write your project report }
+      - { key: abstract, label: Write your abstract }
+      - { key: poster_plan, label: Plan your poster layout }
+    exit_criteria:
+      - The report has every expected section, written by the learner.
+      - The abstract summarises the purpose, method, results and conclusion.
+      - The learner has a plan for the poster.
+    instructions: |
+      The writing must be the learner's. Give the structure (the sections a report needs,
+      what an abstract contains, how a poster is laid out) and feedback on their drafts:
+      what is clear, what is missing, what a judge would ask. Do not write or rewrite
+      sections for them. If their English is uncertain, help them say what they mean in
+      their own voice rather than replacing it with yours.
+
+      Remind them that the logbook is evidence of the journey and is read by judges, mess
+      and mistakes included.
+
+  - key: expo_preparation
+    title: Expo Preparation
+    goal: Get ready to present your project and answer the judges' questions with confidence.
+    deliverables:
+      - { key: display_board, label: Finish your display board }
+      - { key: pitch, label: Practise a two-minute explanation of your project }
+      - { key: judge_questions, label: Practise answering tough questions }
+      - { key: checklist_day, label: Pack everything you need for the day }
+    exit_criteria:
+      - The learner can explain the project in about two minutes without reading.
+      - The learner has practised answering questions about weaknesses and next steps.
+    instructions: |
+      Build the learner's confidence by making them practise, not by reassuring them.
+      Ask them to explain the project to you as if you were a judge, then give specific
+      feedback. Use quiz_me for quick checks of their own project's science. Prepare them
+      for the hard questions: why this method, what went wrong, what they would do
+      differently, how they know the result is real, and how they used AI.
+
+      Judges reward honesty about limitations. Help the learner be ready to say "I don't
+      know, but here is how I would find out".

@@ -43,6 +43,9 @@ class Project(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
     # A rolling summary of the conversation so far, refreshed by the fast model,
     # so the mentor keeps context without resending the whole history.
     memory: Mapped[str] = mapped_column(Text, default="", server_default="")
+    # How many messages the summary already covers, so it is refreshed every
+    # few turns rather than on every one.
+    memory_message_count: Mapped[int] = mapped_column(Integer, default=0, server_default=text("0"))
     status: Mapped[str] = mapped_column(String(20), default=ProjectStatus.ACTIVE.value)
     last_activity_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=text("now()")

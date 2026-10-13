@@ -2,17 +2,24 @@ import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Query, Response, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import CurrentUser, SessionDep
 from app.core.errors import error_responses
+from app.models import Project
 from app.schemas.chat import (
+    AdvanceStageRequest,
+    ChecklistItemOut,
+    ChecklistItemUpdate,
     ConversationCreate,
     ConversationOut,
     ProjectCreate,
     ProjectDetail,
     ProjectOut,
     ProjectUpdate,
+    StageOut,
 )
+from app.services import pathway
 from app.services import projects as project_service
 
 router = APIRouter(prefix="/projects", tags=["projects"], responses=error_responses(401, 404))
@@ -87,3 +94,58 @@ async def create_conversation(
     project = await project_service.get(session, user, project_id)
     conversation = await project_service.create_conversation(session, project, body.title)
     return ConversationOut.model_validate(conversation)
+
+
+async def _stages(session: AsyncSession, project: Project) -> list[StageOut]:
+    return [
+        StageOut(
+            key=stage.definition.key,
+            position=stage.definition.position,
+            title=stage.definition.title,
+            goal=stage.definition.goal,
+            status=stage.state.status,
+            handoff=stage.definition.handoff,
+            checklist=[ChecklistItemOut(**item) for item in stage.items],
+        )
+        for stage in await pathway.progress(session, project)
+    ]
+
+
+@router.get("/{project_id}/stages", response_model=list[StageOut])
+async def list_stages(
+    project_id: uuid.UUID, user: CurrentUser, session: SessionDep
+) -> list[StageOut]:
+    """The nine stages with this project's progress and checklists."""
+    project = await project_service.get(session, user, project_id)
+    stages = await _stages(session, project)
+    await session.commit()
+    return stages
+
+
+@router.put("/{project_id}/stages/{stage_key}/checklist/{item_key}", response_model=list[StageOut])
+async def set_checklist_item(
+    project_id: uuid.UUID,
+    stage_key: str,
+    item_key: str,
+    body: ChecklistItemUpdate,
+    user: CurrentUser,
+    session: SessionDep,
+) -> list[StageOut]:
+    """Lets the learner tick or untick a deliverable themselves."""
+    project = await project_service.get(session, user, project_id)
+    await pathway.set_item(
+        session, project, stage_key=stage_key, item_key=item_key, done=body.done, by="learner"
+    )
+    await session.commit()
+    return await _stages(session, project)
+
+
+@router.post("/{project_id}/stages/advance", response_model=ProjectOut)
+async def advance_stage(
+    project_id: uuid.UUID, body: AdvanceStageRequest, user: CurrentUser, session: SessionDep
+) -> ProjectOut:
+    """The learner confirms moving on to the next stage."""
+    project = await project_service.get(session, user, project_id)
+    return ProjectOut.model_validate(
+        await pathway.advance(session, project, expected_from=body.from_stage)
+    )

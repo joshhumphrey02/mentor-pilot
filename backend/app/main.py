@@ -7,6 +7,7 @@ import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRoute
+from sqlalchemy.exc import SQLAlchemyError
 
 from app import __version__
 from app.ai.registry import ProviderRegistry
@@ -20,6 +21,7 @@ from app.core.middleware import RequestContextMiddleware, SecurityHeadersMiddlew
 from app.core.rate_limit import register_rate_limiter
 from app.core.spa import mount_spa
 from app.db.session import create_engine, create_session_factory
+from app.services import pathway
 from app.services.chat import ChatService
 from app.services.email import build_email_sender
 from app.services.google_oauth import HttpxGoogleOAuthClient
@@ -46,6 +48,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.session_factory = create_session_factory(engine)
         app.state.ai.bind(app.state.session_factory)
         app.state.chat.bind(app.state.session_factory)
+        async with app.state.session_factory() as session:
+            try:
+                await pathway.ensure_definitions(session)
+            except SQLAlchemyError:
+                # The table does not exist until migrations have run.
+                logger.warning("app.stage_definitions_not_loaded", hint="run `make migrate`")
         logger.info("app.started", environment=settings.environment, version=__version__)
         try:
             yield

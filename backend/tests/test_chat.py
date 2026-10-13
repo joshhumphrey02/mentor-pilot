@@ -206,7 +206,7 @@ async def test_model_sees_earlier_turns_and_the_learner_context(
     sent = last["messages"]
     assert isinstance(sent, list)
     assert [m.role for m in sent] == ["user", "assistant", "user"]
-    assert sent[1].text == REPLY, "the model sees its own reply verbatim, directives included"
+    assert sent[1].text == REPLY.strip(), "the model sees its own reply, directives included"
     assert sent[2].text == "Why a resistor?"
     system = str(last["system"])
     assert "Solar phone charger" in system

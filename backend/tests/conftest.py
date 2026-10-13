@@ -17,6 +17,7 @@ from app.core.time import utcnow
 from app.db.base import Base
 from app.main import create_app
 from app.models import User, UserRole
+from app.services import pathway
 from app.services.email import EmailMessage
 
 PASSWORD = "correct horse battery"
@@ -79,6 +80,8 @@ async def app(settings: Settings) -> AsyncIterator[FastAPI]:
         async with application.state.engine.begin() as connection:
             await connection.run_sync(Base.metadata.drop_all)
             await connection.run_sync(Base.metadata.create_all)
+        async with application.state.session_factory() as session:
+            await pathway.ensure_definitions(session)
         yield application
 
 
@@ -88,7 +91,12 @@ async def _clean_state(app: FastAPI) -> AsyncIterator[None]:
     limiter.enabled = False
     limiter.reset()
     yield
-    tables = ", ".join(f'"{table.name}"' for table in Base.metadata.sorted_tables)
+    # Stage definitions are reference data, loaded once for the whole run.
+    tables = ", ".join(
+        f'"{table.name}"'
+        for table in Base.metadata.sorted_tables
+        if table.name != "stage_definitions"
+    )
     async with app.state.engine.begin() as connection:
         await connection.execute(text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE"))
 

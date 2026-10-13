@@ -79,14 +79,23 @@ class BlockStreamParser:
                 self._flush_partial()
         return self._drain()
 
+    def add(self, block: Block) -> list[ParserEvent]:
+        """Appends a block that did not come from the text stream (a tool made it)."""
+        self._close_markdown()
+        self._events.append(BlockComplete(self._next_index, block))
+        self.blocks.append(block)
+        return self._drain()
+
     def finish(self) -> list[ParserEvent]:
-        """Call when the stream ends. Closes whatever is still open."""
+        """Closes whatever is still open. Call at the end of each model response;
+        the parser can then be fed again, continuing the same list of blocks."""
         if self._line:
             self._end_line(final=True)
         if self._directive is not None:
             # The model stopped mid-directive (token limit): keep what arrived.
             self._close_directive()
         self._close_markdown()
+        self._in_code = False
         return self._drain()
 
     # --- internals ------------------------------------------------------------

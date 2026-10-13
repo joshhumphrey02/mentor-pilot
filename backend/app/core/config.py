@@ -82,6 +82,11 @@ class Settings(BaseSettings):
     ai_price_input_per_mtok: float | None = None
     ai_price_output_per_mtok: float | None = None
 
+    # Enables the search_videos tool. Without it the mentor simply has no video search.
+    youtube_api_key: SecretStr | None = None
+    # Sent with requests to Wikimedia, whose API policy asks for a contact address.
+    contact_email: str = "admin@example.com"
+
     # --- Rate limits (slowapi syntax) ---------------------------------------
     rate_limit_enabled: bool = True
     rate_limit_auth: str = "10/minute"

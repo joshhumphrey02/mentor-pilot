@@ -386,6 +386,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{project_id}/stages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Stages
+         * @description The nine stages with this project's progress and checklists.
+         */
+        get: operations["list_stages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/stages/advance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Advance Stage
+         * @description The learner confirms moving on to the next stage.
+         */
+        post: operations["advance_stage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/stages/{stage_key}/checklist/{item_key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Checklist Item
+         * @description Lets the learner tick or untick a deliverable themselves.
+         */
+        put: operations["set_checklist_item"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/schools": {
         parameters: {
             query?: never;
@@ -492,6 +552,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AdvanceStageRequest */
+        AdvanceStageRequest: {
+            /** From Stage */
+            from_stage: string;
+        };
         /** AuthProvidersResponse */
         AuthProvidersResponse: {
             /** Google */
@@ -500,7 +565,7 @@ export interface components {
         /** BlockCompleteEvent */
         BlockCompleteEvent: {
             /** Block */
-            block: components["schemas"]["MarkdownBlock"] | components["schemas"]["CalloutBlock"] | components["schemas"]["SuggestedRepliesBlock"] | components["schemas"]["ErrorBlock"];
+            block: components["schemas"]["MarkdownBlock"] | components["schemas"]["CalloutBlock"] | components["schemas"]["SuggestedRepliesBlock"] | components["schemas"]["ErrorBlock"] | components["schemas"]["IdeaCardsBlock"] | components["schemas"]["ComparisonTableBlock"] | components["schemas"]["DiagramBlock"] | components["schemas"]["ImageGalleryBlock"] | components["schemas"]["VideoCardsBlock"] | components["schemas"]["ChartBlock"] | components["schemas"]["ChecklistBlock"] | components["schemas"]["ExperimentPlanBlock"] | components["schemas"]["BomTableBlock"] | components["schemas"]["QuizBlock"] | components["schemas"]["StageTransitionBlock"];
             /** Index */
             index: number;
         };
@@ -510,6 +575,50 @@ export interface components {
             index: number;
             /** Type */
             type: string;
+        };
+        /** BomItem */
+        BomItem: {
+            /** Name */
+            name: string;
+            /** Quantity */
+            quantity: number;
+            /**
+             * Substitute
+             * @description A cheaper or recycled alternative, if there is one.
+             * @default
+             */
+            substitute: string;
+            /**
+             * Unit Price Zar
+             * @description Estimated price each, in rand. 0 if recycled or free.
+             */
+            unit_price_zar: number;
+            /**
+             * Where To Get
+             * @description A kind of shop or source, e.g. 'hardware store'.
+             * @default
+             */
+            where_to_get: string;
+        };
+        /** BomTableBlock */
+        BomTableBlock: {
+            /** Items */
+            items: components["schemas"]["BomItem"][];
+            /**
+             * Title
+             * @default Bill of materials
+             */
+            title: string;
+            /**
+             * Total Zar
+             * @default 0
+             */
+            total_zar: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "bom_table";
         };
         /** CalloutBlock */
         CalloutBlock: {
@@ -527,6 +636,51 @@ export interface components {
              */
             variant: "tip" | "safety" | "judge_insight" | "common_mistake";
         };
+        /** ChartBlock */
+        ChartBlock: {
+            /**
+             * Chart Type
+             * @description line: change over a continuous quantity. bar: comparing categories. scatter: the relationship between two measured quantities.
+             * @enum {string}
+             */
+            chart_type: "line" | "bar" | "scatter";
+            /** Series */
+            series: components["schemas"]["ChartSeries"][];
+            /** Title */
+            title: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "chart";
+            /**
+             * X Label
+             * @description Axis label, with units.
+             */
+            x_label: string;
+            /**
+             * Y Label
+             * @description Axis label, with units.
+             */
+            y_label: string;
+        };
+        /** ChartPoint */
+        ChartPoint: {
+            /**
+             * X
+             * @description A number, or a category label for bar charts.
+             */
+            x: number | string;
+            /** Y */
+            y: number;
+        };
+        /** ChartSeries */
+        ChartSeries: {
+            /** Name */
+            name: string;
+            /** Points */
+            points: components["schemas"]["ChartPoint"][];
+        };
         /**
          * ChatStreamEvents
          * @description Not sent as-is: documents the SSE event names and their payloads.
@@ -540,6 +694,69 @@ export interface components {
             text_delta: components["schemas"]["TextDeltaEvent"];
             tool_status: components["schemas"]["ToolStatusEvent"];
             usage: components["schemas"]["UsageOut"];
+        };
+        /**
+         * ChecklistBlock
+         * @description Points at a stage's checklist. The UI shows its live state and lets the
+         *     learner tick items, so the block stores no copy that could go stale.
+         */
+        ChecklistBlock: {
+            /** Stage Key */
+            stage_key: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "checklist";
+        };
+        /** ChecklistItemOut */
+        ChecklistItemOut: {
+            /** Done */
+            done: boolean;
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+            /** Note */
+            note: string;
+        };
+        /** ChecklistItemUpdate */
+        ChecklistItemUpdate: {
+            /** Done */
+            done: boolean;
+        };
+        /** ComparisonRow */
+        ComparisonRow: {
+            /**
+             * Criterion
+             * @description What is being compared, e.g. 'Cost'.
+             */
+            criterion: string;
+            /**
+             * Values
+             * @description One short value per option, in the same order as `options`.
+             */
+            values: string[];
+        };
+        /** ComparisonTableBlock */
+        ComparisonTableBlock: {
+            /**
+             * Options
+             * @description The things being compared (column headings).
+             */
+            options: string[];
+            /** Rows */
+            rows: components["schemas"]["ComparisonRow"][];
+            /**
+             * Title
+             * @default
+             */
+            title: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "comparison_table";
         };
         /** ConversationCreate */
         ConversationCreate: {
@@ -586,6 +803,19 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** DataTableTemplate */
+        DataTableTemplate: {
+            /**
+             * Columns
+             * @description Column headings, with units.
+             */
+            columns: string[];
+            /**
+             * Rows
+             * @description How many blank rows (usually one per trial).
+             */
+            rows: number;
+        };
         /** DeleteAccountRequest */
         DeleteAccountRequest: {
             /**
@@ -595,6 +825,26 @@ export interface components {
             confirm: "DELETE";
             /** Password */
             password?: string | null;
+        };
+        /** DiagramBlock */
+        DiagramBlock: {
+            /**
+             * Caption
+             * @default
+             */
+            caption: string;
+            /**
+             * Mermaid
+             * @description Mermaid diagram source, e.g. starting with 'flowchart TD'. Keep node labels short. Do not wrap it in a code fence.
+             */
+            mermaid: string;
+            /** Title */
+            title: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "diagram";
         };
         /**
          * DoneEvent
@@ -638,6 +888,37 @@ export interface components {
             /** Detail */
             detail: string;
         };
+        /** ExperimentPlanBlock */
+        ExperimentPlanBlock: {
+            /**
+             * Controlled Variables
+             * @description What must stay the same.
+             */
+            controlled_variables: string[];
+            data_table: components["schemas"]["DataTableTemplate"];
+            /**
+             * Dependent Variable
+             * @description What they will measure, and with what.
+             */
+            dependent_variable: string;
+            /**
+             * Independent Variable
+             * @description The one thing the learner will change on purpose.
+             */
+            independent_variable: string;
+            /** Title */
+            title: string;
+            /**
+             * Trials
+             * @description How many times each test is repeated.
+             */
+            trials: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "experiment_plan";
+        };
         /** FeedbackRequest */
         FeedbackRequest: {
             /**
@@ -645,6 +926,31 @@ export interface components {
              * @enum {integer}
              */
             value: -1 | 0 | 1;
+        };
+        /** GalleryImage */
+        GalleryImage: {
+            /**
+             * Author
+             * @default
+             */
+            author: string;
+            /** Height */
+            height?: number | null;
+            /**
+             * License
+             * @default
+             */
+            license: string;
+            /** Source Url */
+            source_url: string;
+            /** Thumbnail Url */
+            thumbnail_url: string;
+            /** Title */
+            title: string;
+            /** Url */
+            url: string;
+            /** Width */
+            width?: number | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -667,6 +973,88 @@ export interface components {
             status: "ok" | "degraded";
             /** Version */
             version: string;
+        };
+        /** IdeaCard */
+        IdeaCard: {
+            /**
+             * Cost Max Zar
+             * @description Highest realistic total cost in rand.
+             */
+            cost_max_zar: number;
+            /**
+             * Cost Min Zar
+             * @description Lowest realistic total cost in rand.
+             */
+            cost_min_zar: number;
+            /**
+             * Difficulty
+             * @description 1 = very easy for this learner, 5 = very hard.
+             */
+            difficulty: number;
+            /**
+             * Field
+             * @description The science or engineering field, e.g. 'Environmental science'.
+             */
+            field: string;
+            /**
+             * Materials
+             * @description The main materials or equipment needed.
+             */
+            materials: string[];
+            /**
+             * Problem
+             * @description The real-world problem this project addresses.
+             */
+            problem: string;
+            /**
+             * Safety Level
+             * @description low = no real risk; medium = needs care; high = needs adult supervision.
+             * @enum {string}
+             */
+            safety_level: "low" | "medium" | "high";
+            /**
+             * Safety Note
+             * @description The main risk and how to manage it. Empty if none.
+             * @default
+             */
+            safety_note: string;
+            /**
+             * Time Needed
+             * @description Roughly how long it takes, e.g. '3 to 4 weeks'.
+             */
+            time_needed: string;
+            /**
+             * Title
+             * @description A short, specific project title.
+             */
+            title: string;
+            /**
+             * Why Judges Like It
+             * @description What would impress an expo judge about this.
+             */
+            why_judges_like_it: string;
+        };
+        /** IdeaCardsBlock */
+        IdeaCardsBlock: {
+            /** Ideas */
+            ideas: components["schemas"]["IdeaCard"][];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "idea_cards";
+        };
+        /** ImageGalleryBlock */
+        ImageGalleryBlock: {
+            /** Images */
+            images: components["schemas"]["GalleryImage"][];
+            /** Query */
+            query: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "image_gallery";
         };
         /** LoginRequest */
         LoginRequest: {
@@ -691,7 +1079,7 @@ export interface components {
         /** MessageOut */
         MessageOut: {
             /** Blocks */
-            blocks: (components["schemas"]["MarkdownBlock"] | components["schemas"]["CalloutBlock"] | components["schemas"]["SuggestedRepliesBlock"] | components["schemas"]["ErrorBlock"])[];
+            blocks: (components["schemas"]["MarkdownBlock"] | components["schemas"]["CalloutBlock"] | components["schemas"]["SuggestedRepliesBlock"] | components["schemas"]["ErrorBlock"] | components["schemas"]["IdeaCardsBlock"] | components["schemas"]["ComparisonTableBlock"] | components["schemas"]["DiagramBlock"] | components["schemas"]["ImageGalleryBlock"] | components["schemas"]["VideoCardsBlock"] | components["schemas"]["ChartBlock"] | components["schemas"]["ChecklistBlock"] | components["schemas"]["ExperimentPlanBlock"] | components["schemas"]["BomTableBlock"] | components["schemas"]["QuizBlock"] | components["schemas"]["StageTransitionBlock"])[];
             /**
              * Conversation Id
              * Format: uuid
@@ -884,6 +1272,38 @@ export interface components {
             /** Name */
             name: string;
         };
+        /** QuizBlock */
+        QuizBlock: {
+            /** Questions */
+            questions: components["schemas"]["QuizQuestion"][];
+            /**
+             * Title
+             * @default Quick check
+             */
+            title: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "quiz";
+        };
+        /** QuizQuestion */
+        QuizQuestion: {
+            /**
+             * Correct Index
+             * @description Index of the right option, from 0.
+             */
+            correct_index: number;
+            /**
+             * Explanation
+             * @description Why that answer is right, in plain language.
+             */
+            explanation: string;
+            /** Options */
+            options: string[];
+            /** Question */
+            question: string;
+        };
         /** RegisterRequest */
         RegisterRequest: {
             /**
@@ -937,6 +1357,48 @@ export interface components {
         SendMessageRequest: {
             /** Text */
             text: string;
+        };
+        /** StageOut */
+        StageOut: {
+            /** Checklist */
+            checklist: components["schemas"]["ChecklistItemOut"][];
+            /** Goal */
+            goal: string;
+            /** Handoff */
+            handoff: boolean;
+            /** Key */
+            key: string;
+            /** Position */
+            position: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "locked" | "active" | "completed";
+            /** Title */
+            title: string;
+        };
+        /**
+         * StageTransitionBlock
+         * @description A proposal to move on. The learner confirms it in the UI; nothing changes
+         *     until they do. Once the project is at `to_stage` the card becomes a celebration.
+         */
+        StageTransitionBlock: {
+            /** From Stage */
+            from_stage: string;
+            /** From Title */
+            from_title: string;
+            /** Summary */
+            summary: string;
+            /** To Stage */
+            to_stage: string;
+            /** To Title */
+            to_title: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "stage_transition";
         };
         /** StudentProfileOut */
         StudentProfileOut: {
@@ -1079,6 +1541,35 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /** VideoCard */
+        VideoCard: {
+            /**
+             * Channel
+             * @default
+             */
+            channel: string;
+            /**
+             * Thumbnail Url
+             * @default
+             */
+            thumbnail_url: string;
+            /** Title */
+            title: string;
+            /** Video Id */
+            video_id: string;
+        };
+        /** VideoCardsBlock */
+        VideoCardsBlock: {
+            /** Query */
+            query: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "video_cards";
+            /** Videos */
+            videos: components["schemas"]["VideoCard"][];
         };
     };
     responses: never;
@@ -2432,6 +2923,163 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ConversationOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_stages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StageOut"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    advance_stage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdvanceStageRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_checklist_item: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+                stage_key: string;
+                item_key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChecklistItemUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StageOut"][];
                 };
             };
             /** @description Unauthorized */

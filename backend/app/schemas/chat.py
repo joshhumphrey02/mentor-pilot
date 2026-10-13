@@ -143,3 +143,34 @@ class MessagePage(BaseModel):
     messages: list[MessageOut]
     # Pass as `before` to load older messages; null when there are none.
     next_before: int | None = Field(default=None)
+
+
+# --- Pathway -----------------------------------------------------------------
+
+
+class ChecklistItemOut(BaseModel):
+    key: str
+    label: str
+    done: bool
+    note: str
+
+
+class StageOut(BaseModel):
+    key: str
+    position: int
+    title: str
+    goal: str
+    status: Literal["locked", "active", "completed"]
+    # True for the stage where a human mentor is offered.
+    handoff: bool
+    checklist: list[ChecklistItemOut]
+
+
+class ChecklistItemUpdate(BaseModel):
+    done: bool
+
+
+class AdvanceStageRequest(BaseModel):
+    # The stage the confirmation card was shown for. Guards against a stale
+    # card moving the project on twice.
+    from_stage: str

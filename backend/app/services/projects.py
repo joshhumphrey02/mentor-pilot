@@ -9,6 +9,7 @@ from app.core.errors import NotFoundError
 from app.core.time import utcnow
 from app.models import Conversation, Message, Project, User
 from app.schemas.chat import ProjectUpdate
+from app.services import pathway
 
 DEFAULT_TITLE = "New project"
 
@@ -22,6 +23,7 @@ async def create(session: AsyncSession, owner: User, title: str) -> tuple[Projec
     project = Project(owner_id=owner.id, title=title or DEFAULT_TITLE)
     session.add(project)
     await session.flush()
+    await pathway.start_project(session, project)
     conversation = Conversation(project_id=project.id)
     session.add(conversation)
     await session.commit()
