@@ -47,8 +47,8 @@ render_diagram = Tool(
         "Draw a diagram from Mermaid source: a flowchart of a process or method, the "
         "engineering design cycle, how the parts of a system connect, or a timeline. Use it "
         "whenever a picture would explain something better than a paragraph. Keep it to a "
-        "handful of nodes with short labels so it reads on a phone. Not for electronic "
-        "circuits."
+        "handful of nodes with short labels so it reads on a phone. For electronic "
+        "circuits use render_circuit instead."
     ),
     args=DiagramBlock,
     run=_diagram,

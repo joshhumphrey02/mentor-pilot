@@ -152,7 +152,9 @@ class Turn:
 
 
 def _sse(name: str, payload: BaseModel) -> ServerSentEvent:
-    return ServerSentEvent(event=name, data=payload.model_dump_json())
+    # by_alias so a circuit wire goes out as {"from": ..., "to": ...}, matching
+    # the REST responses and the generated frontend types.
+    return ServerSentEvent(event=name, data=payload.model_dump_json(by_alias=True))
 
 
 def learner_context(user: User) -> LearnerContext:

@@ -3,6 +3,7 @@
 from typing import Any
 
 from app.ai.tools.base import Tool
+from app.ai.tools.circuit import render_circuit
 from app.ai.tools.ideas import compare_ideas, propose_project_ideas, select_idea
 from app.ai.tools.media import search_images, search_videos
 from app.ai.tools.progress import advance_stage, revisit_stage, update_checklist
@@ -23,6 +24,7 @@ ALL_TOOLS: tuple[Tool[Any], ...] = (
     advance_stage,
     revisit_stage,
     render_diagram,
+    render_circuit,
     render_chart,
     search_images,
     search_videos,

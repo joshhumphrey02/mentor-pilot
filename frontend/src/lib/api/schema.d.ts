@@ -288,6 +288,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/media/component-photo/{component}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Component Photo
+         * @description A real photo of an electronic component, from Wikimedia Commons, with its credit.
+         */
+        get: operations["component_photo"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/messages/{message_id}": {
         parameters: {
             query?: never;
@@ -565,7 +585,7 @@ export interface components {
         /** BlockCompleteEvent */
         BlockCompleteEvent: {
             /** Block */
-            block: components["schemas"]["MarkdownBlock"] | components["schemas"]["CalloutBlock"] | components["schemas"]["SuggestedRepliesBlock"] | components["schemas"]["ErrorBlock"] | components["schemas"]["IdeaCardsBlock"] | components["schemas"]["ComparisonTableBlock"] | components["schemas"]["DiagramBlock"] | components["schemas"]["ImageGalleryBlock"] | components["schemas"]["VideoCardsBlock"] | components["schemas"]["ChartBlock"] | components["schemas"]["ChecklistBlock"] | components["schemas"]["ExperimentPlanBlock"] | components["schemas"]["BomTableBlock"] | components["schemas"]["QuizBlock"] | components["schemas"]["StageTransitionBlock"];
+            block: components["schemas"]["MarkdownBlock"] | components["schemas"]["CalloutBlock"] | components["schemas"]["SuggestedRepliesBlock"] | components["schemas"]["ErrorBlock"] | components["schemas"]["IdeaCardsBlock"] | components["schemas"]["ComparisonTableBlock"] | components["schemas"]["DiagramBlock"] | components["schemas"]["ImageGalleryBlock"] | components["schemas"]["VideoCardsBlock"] | components["schemas"]["ChartBlock"] | components["schemas"]["ChecklistBlock"] | components["schemas"]["ExperimentPlanBlock"] | components["schemas"]["BomTableBlock"] | components["schemas"]["QuizBlock"] | components["schemas"]["CircuitBlock"] | components["schemas"]["StageTransitionBlock"];
             /** Index */
             index: number;
         };
@@ -725,6 +745,123 @@ export interface components {
             /** Done */
             done: boolean;
         };
+        /** CircuitAnnotation */
+        CircuitAnnotation: {
+            /**
+             * At
+             * @description A breadboard hole: a row letter A-J and a column 1-30, e.g. 'E12'. Or a power rail: '+top', '-top', '+bottom' or '-bottom'.
+             */
+            at: string;
+            /** Text */
+            text: string;
+        };
+        /** CircuitBlock */
+        CircuitBlock: {
+            /** Annotations */
+            annotations?: components["schemas"]["CircuitAnnotation"][];
+            /**
+             * Components
+             * @description In the order they should be placed.
+             */
+            components: components["schemas"]["CircuitComponent"][];
+            /** Highlight */
+            highlight?: string[];
+            mistake?: components["schemas"]["CircuitMistake"] | null;
+            /** Title */
+            title: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "circuit";
+            /**
+             * Wires
+             * @description In the order they should be added.
+             */
+            wires?: components["schemas"]["CircuitWire"][];
+        };
+        /** CircuitComponent */
+        CircuitComponent: {
+            /**
+             * Id
+             * @description A short unique id, e.g. 'led1'.
+             */
+            id: string;
+            /**
+             * Note
+             * @description One short teaching point shown when this part is placed in step-through, e.g. 'The long leg is the anode'.
+             * @default
+             */
+            note: string;
+            /**
+             * Pins
+             * @description Where each leg goes, by pin name. led: anode, cathode. resistor, button, ldr, dc_motor: a, b. buzzer, battery: positive, negative. potentiometer: a, wiper, b. ultrasonic: vcc, trig, echo, gnd. servo: signal, vcc, gnd. arduino_uno: only the pins used, from 5V, 3V3, GND, D0-D13, A0-A5.
+             */
+            pins: {
+                [key: string]: string;
+            };
+            /**
+             * Props
+             * @description Optional details: 'color' for an LED (red, green, yellow, blue, white), 'value' for a resistor (e.g. '220Ω') or battery (e.g. '3V').
+             */
+            props?: {
+                [key: string]: string;
+            };
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "led" | "resistor" | "button" | "buzzer" | "ldr" | "potentiometer" | "battery" | "arduino_uno" | "ultrasonic" | "servo" | "dc_motor";
+        };
+        /**
+         * CircuitMistake
+         * @description The "Don't" version: the same circuit built with one common mistake.
+         */
+        CircuitMistake: {
+            /** Components */
+            components: components["schemas"]["CircuitComponent"][];
+            /**
+             * Explanation
+             * @description What goes wrong and why, in plain language.
+             */
+            explanation: string;
+            /**
+             * Highlight
+             * @description The holes where the mistake is.
+             */
+            highlight?: string[];
+            /**
+             * Title
+             * @description The mistake in a few words, e.g. 'LED backwards'.
+             */
+            title: string;
+            /** Wires */
+            wires?: components["schemas"]["CircuitWire"][];
+        };
+        /** CircuitWire */
+        CircuitWire: {
+            /**
+             * Color
+             * @description red for positive, black for negative, else any.
+             * @default blue
+             */
+            color: string;
+            /**
+             * From
+             * @description A breadboard hole: a row letter A-J and a column 1-30, e.g. 'E12'. Or a power rail: '+top', '-top', '+bottom' or '-bottom'.
+             */
+            from: string;
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+            /**
+             * To
+             * @description A breadboard hole: a row letter A-J and a column 1-30, e.g. 'E12'. Or a power rail: '+top', '-top', '+bottom' or '-bottom'.
+             */
+            to: string;
+        };
         /** ComparisonRow */
         ComparisonRow: {
             /**
@@ -757,6 +894,14 @@ export interface components {
              * @enum {string}
              */
             type: "comparison_table";
+        };
+        /** ComponentPhoto */
+        ComponentPhoto: {
+            /** Component */
+            component: string;
+            image: components["schemas"]["GalleryImage"] | null;
+            /** Label */
+            label: string;
         };
         /** ConversationCreate */
         ConversationCreate: {
@@ -1079,7 +1224,7 @@ export interface components {
         /** MessageOut */
         MessageOut: {
             /** Blocks */
-            blocks: (components["schemas"]["MarkdownBlock"] | components["schemas"]["CalloutBlock"] | components["schemas"]["SuggestedRepliesBlock"] | components["schemas"]["ErrorBlock"] | components["schemas"]["IdeaCardsBlock"] | components["schemas"]["ComparisonTableBlock"] | components["schemas"]["DiagramBlock"] | components["schemas"]["ImageGalleryBlock"] | components["schemas"]["VideoCardsBlock"] | components["schemas"]["ChartBlock"] | components["schemas"]["ChecklistBlock"] | components["schemas"]["ExperimentPlanBlock"] | components["schemas"]["BomTableBlock"] | components["schemas"]["QuizBlock"] | components["schemas"]["StageTransitionBlock"])[];
+            blocks: (components["schemas"]["MarkdownBlock"] | components["schemas"]["CalloutBlock"] | components["schemas"]["SuggestedRepliesBlock"] | components["schemas"]["ErrorBlock"] | components["schemas"]["IdeaCardsBlock"] | components["schemas"]["ComparisonTableBlock"] | components["schemas"]["DiagramBlock"] | components["schemas"]["ImageGalleryBlock"] | components["schemas"]["VideoCardsBlock"] | components["schemas"]["ChartBlock"] | components["schemas"]["ChecklistBlock"] | components["schemas"]["ExperimentPlanBlock"] | components["schemas"]["BomTableBlock"] | components["schemas"]["QuizBlock"] | components["schemas"]["CircuitBlock"] | components["schemas"]["StageTransitionBlock"])[];
             /**
              * Conversation Id
              * Format: uuid
@@ -2505,6 +2650,55 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthResponse"];
+                };
+            };
+        };
+    };
+    component_photo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                component: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ComponentPhoto"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

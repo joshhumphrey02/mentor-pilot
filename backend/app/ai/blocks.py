@@ -254,6 +254,108 @@ class QuizBlock(BaseModel):
     questions: Annotated[list[QuizQuestion], Field(min_length=1, max_length=5)]
 
 
+ComponentType = Literal[
+    "led",
+    "resistor",
+    "button",
+    "buzzer",
+    "ldr",
+    "potentiometer",
+    "battery",
+    "arduino_uno",
+    "ultrasonic",
+    "servo",
+    "dc_motor",
+]
+Hole = Annotated[
+    str,
+    Field(
+        max_length=12,
+        description="A breadboard hole: a row letter A-J and a column 1-30, e.g. 'E12'. Or a "
+        "power rail: '+top', '-top', '+bottom' or '-bottom'.",
+    ),
+]
+
+
+class CircuitComponent(BaseModel):
+    id: Annotated[str, Field(max_length=24, description="A short unique id, e.g. 'led1'.")]
+    type: ComponentType
+    pins: Annotated[
+        dict[str, Hole],
+        Field(
+            description="Where each leg goes, by pin name. led: anode, cathode. resistor, "
+            "button, ldr, dc_motor: a, b. buzzer, battery: positive, negative. potentiometer: "
+            "a, wiper, b. ultrasonic: vcc, trig, echo, gnd. servo: signal, vcc, gnd. "
+            "arduino_uno: only the pins used, from 5V, 3V3, GND, D0-D13, A0-A5."
+        ),
+    ]
+    props: Annotated[
+        dict[str, str],
+        Field(
+            description="Optional details: 'color' for an LED (red, green, yellow, blue, "
+            "white), 'value' for a resistor (e.g. '220Ω') or battery (e.g. '3V')."
+        ),
+    ] = Field(default_factory=dict)
+    note: Annotated[
+        str,
+        Field(
+            max_length=160,
+            description="One short teaching point shown when this part is placed in "
+            "step-through, e.g. 'The long leg is the anode'.",
+        ),
+    ] = ""
+
+
+class CircuitWire(BaseModel):
+    from_: Annotated[Hole, Field(alias="from")]
+    to: Hole
+    color: Annotated[
+        str, Field(max_length=16, description="red for positive, black for negative, else any.")
+    ] = "blue"
+    note: Annotated[str, Field(max_length=160)] = ""
+
+    model_config = {"populate_by_name": True}
+
+
+class CircuitAnnotation(BaseModel):
+    at: Hole
+    text: Annotated[str, Field(max_length=120)]
+
+
+class CircuitMistake(BaseModel):
+    """The "Don't" version: the same circuit built with one common mistake."""
+
+    title: Annotated[
+        str, Field(max_length=80, description="The mistake in a few words, e.g. 'LED backwards'.")
+    ]
+    explanation: Annotated[
+        str,
+        Field(max_length=400, description="What goes wrong and why, in plain language."),
+    ]
+    components: Annotated[list[CircuitComponent], Field(min_length=1, max_length=12)]
+    wires: Annotated[list[CircuitWire], Field(max_length=24)] = Field(default_factory=list)
+    highlight: Annotated[
+        list[Hole], Field(max_length=8, description="The holes where the mistake is.")
+    ] = Field(default_factory=list)
+
+
+class CircuitBlock(BaseModel):
+    type: Literal["circuit"] = "circuit"
+    title: Annotated[str, Field(max_length=100)]
+    components: Annotated[
+        list[CircuitComponent],
+        Field(min_length=1, max_length=12, description="In the order they should be placed."),
+    ]
+    wires: Annotated[
+        list[CircuitWire], Field(max_length=24, description="In the order they should be added.")
+    ] = Field(default_factory=list)
+    highlight: Annotated[list[Hole], Field(max_length=8)] = Field(default_factory=list)
+    annotations: Annotated[list[CircuitAnnotation], Field(max_length=6)] = Field(
+        default_factory=list
+    )
+    mistake: CircuitMistake | None = None
+
+
 class StageTransitionBlock(BaseModel):
     """A proposal to move on. The learner confirms it in the UI; nothing changes
     until they do. Once the project is at `to_stage` the card becomes a celebration."""
@@ -281,6 +383,7 @@ Block = Annotated[
     | ExperimentPlanBlock
     | BomTableBlock
     | QuizBlock
+    | CircuitBlock
     | StageTransitionBlock,
     Field(discriminator="type"),
 ]
@@ -289,11 +392,17 @@ BLOCK_LIST: TypeAdapter[list[Block]] = TypeAdapter(list[Block])
 
 
 def dump_blocks(blocks: list[Block]) -> list[dict[str, Any]]:
-    return [block.model_dump(mode="json") for block in blocks]
+    # by_alias so a wire is stored as {"from": ..., "to": ...}, as the UI reads it.
+    return [block.model_dump(mode="json", by_alias=True) for block in blocks]
 
 
 def load_blocks(raw: list[dict[str, Any]]) -> list[Block]:
     return BLOCK_LIST.validate_python(raw)
+
+
+_MACHINE_KEYS = frozenset(
+    {"type", "stage_key", "from_stage", "to_stage", "video_id", "id", "pins", "from", "to", "at"}
+)
 
 
 def block_strings(block: Block) -> list[str]:
@@ -306,13 +415,11 @@ def block_strings(block: Block) -> list[str]:
         elif isinstance(value, dict):
             for key, item in value.items():
                 # Skip machine values: type tags, keys, ids and links.
-                if key not in ("type", "stage_key", "from_stage", "to_stage", "video_id") and (
-                    not key.endswith("url")
-                ):
+                if key not in _MACHINE_KEYS and (not key.endswith("url")):
                     walk(item)
         elif isinstance(value, list):
             for item in value:
                 walk(item)
 
-    walk(block.model_dump(mode="json"))
+    walk(block.model_dump(mode="json", by_alias=True))
     return found

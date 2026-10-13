@@ -52,36 +52,33 @@ class SearchImagesArgs(BaseModel):
     ]
 
 
-async def _search_images(context: ToolContext, args: SearchImagesArgs) -> ToolOutcome:
-    if _UNSUITABLE.search(args.query):
-        return ToolOutcome(result="That search is not available.", is_error=True)
+async def find_images(
+    http: httpx.AsyncClient, contact_email: str, query: str, *, limit: int = MAX_IMAGES
+) -> list[GalleryImage] | None:
+    """Suitable, credited photos for a query. None means the search itself failed."""
+    if _UNSUITABLE.search(query):
+        return []
     try:
-        response = await context.http.get(
+        response = await http.get(
             COMMONS_API,
             params={
                 "action": "query",
                 "format": "json",
                 "generator": "search",
-                "gsrsearch": f"{args.query} filetype:bitmap|drawing",
+                "gsrsearch": f"{query} filetype:bitmap|drawing",
                 "gsrnamespace": 6,  # the File: namespace
                 "gsrlimit": 15,
                 "prop": "imageinfo",
                 "iiprop": "url|mime|size|extmetadata",
                 "iiurlwidth": THUMBNAIL_WIDTH,
             },
-            headers={
-                "User-Agent": f"MentorPilot/1.0 (educational app; {context.settings.contact_email})"
-            },
+            headers={"User-Agent": f"MentorPilot/1.0 (educational app; {contact_email})"},
         )
         response.raise_for_status()
         pages = (response.json().get("query") or {}).get("pages") or {}
     except (httpx.HTTPError, ValueError) as exc:
         logger.warning("tools.image_search_failed", error=type(exc).__name__)
-        return ToolOutcome(
-            result="The image search is unavailable right now. Carry on without photos, and "
-            "describe the item in words instead.",
-            is_error=True,
-        )
+        return None
 
     images: list[GalleryImage] = []
     # The API returns pages keyed by id, unordered; `index` is the search rank.
@@ -108,9 +105,21 @@ async def _search_images(context: ToolContext, args: SearchImagesArgs) -> ToolOu
                 height=info.get("thumbheight"),
             )
         )
-        if len(images) == MAX_IMAGES:
+        if len(images) == limit:
             break
+    return images
 
+
+async def _search_images(context: ToolContext, args: SearchImagesArgs) -> ToolOutcome:
+    if _UNSUITABLE.search(args.query):
+        return ToolOutcome(result="That search is not available.", is_error=True)
+    images = await find_images(context.http, context.settings.contact_email, args.query)
+    if images is None:
+        return ToolOutcome(
+            result="The image search is unavailable right now. Carry on without photos, and "
+            "describe the item in words instead.",
+            is_error=True,
+        )
     if not images:
         return ToolOutcome(
             result=f"No suitable photos were found for '{args.query}'. Try a simpler or more "

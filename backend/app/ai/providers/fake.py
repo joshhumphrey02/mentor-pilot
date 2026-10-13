@@ -46,6 +46,15 @@ class FakeProvider:
     def _reply(self, messages: Sequence[ChatMessage], tools: Sequence[ToolSpec]) -> ChatMessage:
         last = messages[-1] if messages else ChatMessage(role="user")
         if last.role == "tool":
+            if any(result.name == "render_circuit" for result in last.tool_results):
+                return ChatMessage(
+                    role="assistant",
+                    text="Try **Step through** to build it one part at a time, then **Reveal "
+                    "inside** to see why each leg needs its own column.\n\n"
+                    ":::callout common_mistake\nSwitch to **Don't** to see the mistake almost "
+                    "everyone makes the first time.\n:::\n\n"
+                    ":::replies\nWhy does the LED need a resistor?\nWhat is inside the board?\n:::",
+                )
             summary = "; ".join(f"{r.name} returned {r.content}" for r in last.tool_results)
             return ChatMessage(role="assistant", text=f"Thanks. {summary}")
         directive = _TOOL_DIRECTIVE.search(last.text)
@@ -57,6 +66,21 @@ class FakeProvider:
                         id=f"fake_{len(self.calls)}",
                         name=directive.group(1),
                         arguments=json.loads(directive.group(2) or "{}"),
+                    )
+                ],
+            )
+        # A canned demonstration of the signature feature, so the app can be
+        # shown off with no API key: ask how to connect an LED on a breadboard.
+        wants_led = "led" in last.text.lower() and "breadboard" in last.text.lower()
+        if wants_led and any(tool.name == "render_circuit" for tool in tools):
+            from app.ai.tools.circuit import LED_CIRCUIT
+
+            return ChatMessage(
+                role="assistant",
+                text="Let me show you on a breadboard.",
+                tool_calls=[
+                    ToolCall(
+                        id=f"fake_{len(self.calls)}", name="render_circuit", arguments=LED_CIRCUIT
                     )
                 ],
             )
