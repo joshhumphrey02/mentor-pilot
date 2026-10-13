@@ -1,6 +1,6 @@
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeftIcon, ChevronDownIcon, HistoryIcon, XIcon } from 'lucide-react'
+import { ArrowLeftIcon, ChevronDownIcon, HistoryIcon, NotebookPenIcon, XIcon } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -14,6 +14,11 @@ import { StageSheet } from '@/features/chat/components/stage-sheet'
 import { Welcome } from '@/features/chat/components/welcome'
 import { useChat } from '@/features/chat/use-chat'
 import { WorkspaceContext } from '@/features/chat/workspace-context'
+import { usePinBlock } from '@/features/workspace/api'
+import { WorkspacePanel } from '@/features/workspace/workspace-panel'
+import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from '@/components/ui/drawer'
+import { errorMessage } from '@/lib/api/errors'
+import { toast } from 'sonner'
 import { PATHWAY_STAGES, stagePosition } from '@/features/pathway/stages'
 import { useVisualViewportHeight } from '@/hooks/use-visual-viewport'
 
@@ -71,6 +76,20 @@ function Workspace({ conversationId }: { conversationId: string }) {
 
   const chat = useChat({ conversationId, onConversationChange, onTurnEnd })
   const [stagesOpen, setStagesOpen] = useState(false)
+  const [toolsOpen, setToolsOpen] = useState(false)
+  const pin = usePinBlock(projectId)
+  const { mutateAsync: pinBlock } = pin
+  const onSave = useCallback(
+    async (messageId: string, blockIndex: number) => {
+      try {
+        await pinBlock({ message_id: messageId, block_index: blockIndex })
+      } catch (error) {
+        toast.error(errorMessage(error))
+        throw error
+      }
+    },
+    [pinBlock],
+  )
   const stage = stagePosition(project.current_stage)
   const workspace = useMemo(
     () => ({
@@ -89,10 +108,12 @@ function Workspace({ conversationId }: { conversationId: string }) {
 
   return (
     <div
-      className="flex h-dvh flex-col overflow-hidden"
+      // On wide screens the project tools sit beside the chat.
+      className="grid h-dvh grid-cols-1 overflow-hidden lg:grid-cols-[minmax(0,1fr)_24rem]"
       // While the on-screen keyboard is open this is shorter than 100dvh.
       style={viewportHeight ? { height: viewportHeight } : undefined}
     >
+    <div className="flex min-h-0 min-w-0 flex-col overflow-hidden">
       <header className="border-b bg-background pt-safe">
         <div className="mx-auto flex h-16 w-full max-w-3xl items-center gap-1 px-2 sm:px-4">
           <Button asChild variant="ghost" size="icon-touch">
@@ -131,6 +152,15 @@ function Workspace({ conversationId }: { conversationId: string }) {
           <Button
             variant="ghost"
             size="icon-touch"
+            className="lg:hidden"
+            aria-label="Checklist, logbook, saved items and data"
+            onClick={() => setToolsOpen(true)}
+          >
+            <NotebookPenIcon />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-touch"
             aria-label="Chats in this project"
             onClick={() => setHistoryOpen(true)}
           >
@@ -157,6 +187,7 @@ function Workspace({ conversationId }: { conversationId: string }) {
             pending={chat.pending}
             onRegenerate={chat.regenerate}
             onQuickReply={chat.send}
+            onSave={onSave}
             empty={<Welcome name={user.full_name.split(' ')[0] || 'there'} onPick={chat.send} />}
           />
         )}
@@ -180,9 +211,36 @@ function Workspace({ conversationId }: { conversationId: string }) {
           </div>
         )}
 
-        <Composer onSend={chat.send} busy={chat.isResponding} suggestions={suggestions} />
+        <Composer
+          projectId={projectId}
+          onSend={chat.send}
+          busy={chat.isResponding}
+          suggestions={suggestions}
+        />
       </main>
       </WorkspaceContext>
+    </div>
+
+      <aside aria-label="Project tools" className="hidden min-h-0 border-l bg-sidebar p-4 lg:block">
+        <WorkspaceContext value={workspace}>
+          <WorkspacePanel projectId={projectId} />
+        </WorkspaceContext>
+      </aside>
+
+      {/* The same tools as a bottom sheet on phones and tablets. */}
+      <Drawer open={toolsOpen} onOpenChange={setToolsOpen}>
+        <DrawerContent className="h-[88dvh] lg:hidden">
+          <DrawerTitle className="sr-only">Project tools</DrawerTitle>
+          <DrawerDescription className="sr-only">
+            Your checklist, logbook, saved items and data.
+          </DrawerDescription>
+          <div className="min-h-0 flex-1 px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <WorkspaceContext value={workspace}>
+              <WorkspacePanel projectId={projectId} />
+            </WorkspaceContext>
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       <StageSheet open={stagesOpen} onOpenChange={setStagesOpen} projectId={projectId} />
 

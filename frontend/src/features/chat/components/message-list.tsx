@@ -1,4 +1,4 @@
-import { ArrowDownIcon } from 'lucide-react'
+import { ArrowDownIcon, BookmarkCheckIcon, BookmarkIcon } from 'lucide-react'
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { BlockRenderer, BlockSkeleton } from '@/components/blocks/block-renderer'
@@ -18,6 +18,50 @@ interface MessageListProps {
   empty: ReactNode
   onRegenerate: () => void
   onQuickReply: (text: string) => void
+  /** Saves one block of a reply to the project. Returns once it is saved. */
+  onSave?: (messageId: string, blockIndex: number) => Promise<unknown>
+}
+
+// The visual blocks worth keeping. Plain text is copied, not saved.
+const SAVEABLE = new Set([
+  'idea_cards',
+  'comparison_table',
+  'diagram',
+  'circuit',
+  'chart',
+  'bom_table',
+  'experiment_plan',
+  'image_gallery',
+  'video_cards',
+  'quiz',
+  'judge_scorecard',
+])
+
+function SaveButton({ onSave }: { onSave: () => Promise<unknown> }) {
+  const [state, setState] = useState<'idle' | 'saving' | 'saved'>('idle')
+  return (
+    <button
+      type="button"
+      disabled={state !== 'idle'}
+      onClick={async () => {
+        setState('saving')
+        try {
+          await onSave()
+          setState('saved')
+        } catch {
+          setState('idle')
+        }
+      }}
+      className="inline-flex min-h-11 items-center gap-1.5 justify-self-start rounded-full px-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-100 sm:min-h-9"
+    >
+      {state === 'saved' ? (
+        <BookmarkCheckIcon aria-hidden="true" className="size-4 text-success" />
+      ) : (
+        <BookmarkIcon aria-hidden="true" className="size-4" />
+      )}
+      {state === 'saved' ? 'Saved to your project' : state === 'saving' ? 'Saving…' : 'Save'}
+    </button>
+  )
 }
 
 function UserBubble({ text, sending }: { text: string; sending?: boolean }) {
@@ -64,6 +108,7 @@ export function MessageList({
   empty,
   onRegenerate,
   onQuickReply,
+  onSave,
 }: MessageListProps) {
   const scroller = useRef<HTMLDivElement>(null)
   const content = useRef<HTMLDivElement>(null)
@@ -126,16 +171,27 @@ export function MessageList({
 
           {messages.map((message) =>
             message.role === 'user' ? (
-              <UserBubble
-                key={message.id}
-                text={message.blocks[0]?.type === 'markdown' ? message.blocks[0].text : ''}
-              />
+              <div key={message.id} className="grid justify-items-end gap-2">
+                {message.blocks.map((block) =>
+                  block.type === 'image' ? (
+                    <BlockRenderer key={block.attachment_id} block={block} />
+                  ) : null,
+                )}
+                <UserBubble
+                  text={message.blocks[0]?.type === 'markdown' ? message.blocks[0].text : ''}
+                />
+              </div>
             ) : (
               <MentorRow key={message.id}>
                 {message.blocks.map((block, index) => (
                   // Blocks never reorder within a saved message.
                   // oxlint-disable-next-line react/no-array-index-key
-                  <BlockRenderer key={index} block={block} onRetry={onRegenerate} />
+                  <div key={index} className="grid min-w-0 gap-1">
+                    <BlockRenderer block={block} onRetry={onRegenerate} />
+                    {onSave && SAVEABLE.has(block.type) && (
+                      <SaveButton onSave={() => onSave(message.id, index)} />
+                    )}
+                  </div>
                 ))}
                 {message.status === 'complete' && !pending && (
                   <MessageActions

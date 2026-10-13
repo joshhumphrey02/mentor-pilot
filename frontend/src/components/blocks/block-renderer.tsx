@@ -11,7 +11,9 @@ import { DiagramBlock } from './diagram-block'
 import { ErrorBlock } from './error-block'
 import { ExperimentPlanBlock } from './experiment-plan-block'
 import { IdeaCardsBlock } from './idea-cards-block'
+import { ImageBlock } from './image-block'
 import { ImageGalleryBlock } from './image-gallery-block'
+import { JudgeScorecardBlock } from './judge-scorecard-block'
 import { MarkdownBlock } from './markdown-block'
 import { QuizBlock } from './quiz-block'
 import { StageTransitionBlock } from './stage-transition-block'
@@ -53,6 +55,10 @@ export function BlockRenderer({ block, onRetry }: BlockRendererProps) {
       return <QuizBlock block={block} />
     case 'circuit':
       return <CircuitBlock block={block} />
+    case 'image':
+      return <ImageBlock block={block} />
+    case 'judge_scorecard':
+      return <JudgeScorecardBlock block={block} />
     case 'stage_transition':
       return <StageTransitionBlock block={block} />
     case 'suggested_replies':

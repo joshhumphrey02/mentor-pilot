@@ -275,3 +275,37 @@ where the tooling forced a deviation. Newest phase last.
 - **Verified by rendering.** There is no browser in the development
   environment, so the SVG was rendered to an image and inspected in its Do,
   Don't and Reveal states. Touch behaviour on a real phone is untested.
+
+## Phase 7: Workspace extras
+
+- **Uploads are identified by their first bytes**, not the filename or the
+  type the browser declares. JPEG, PNG and WebP only, 5 MB by default, stored
+  under a server-chosen name and served with a sandboxing CSP. SVG is refused
+  because it can carry script.
+- **Storage is local disk behind a three-method interface** (`services/storage.py`).
+  The S3-compatible backend the spec mentions is not written; it must be
+  before running more than one server, since local disk is not shared.
+- **Only the newest message's photos are sent to the model as images.** Earlier
+  ones are replaced by a short note in the history, because resending images
+  every turn is expensive. Providers without vision get the note instead.
+- **A message needs text; a photo alone is sent with a default sentence**
+  ("Here is a photo. What do you think?"), which keeps the API rule simple.
+- **Judge practice is one tool with two actions.** `start` returns the rules of
+  judge mode to the model (one question at a time, no coaching); `score` shows
+  a rubric scorecard. The questioning itself is ordinary conversation.
+- **Pins store a copy of the block**, so a saved diagram survives the reply it
+  came from being regenerated. Reply chips, errors, stage cards and the
+  learner's own photos cannot be pinned.
+- **Editing a logbook entry keeps its original date.**
+- **Datasets hold cell text exactly as typed.** Numbers are parsed only when
+  charting, and a decimal comma is accepted. The first column is the x axis.
+- **The PDF uses the built-in Latin-1 fonts** to avoid shipping a font file, so
+  typographic characters are swapped for plain ones (curly quotes, arrows, Ω
+  becomes "ohm"). Text in scripts outside Latin-1 would print as "?"; bundle a
+  Unicode font when other languages are added. Charts and diagrams are not
+  drawn in the PDF: data appears as tables and other saved items are listed.
+- **Voice input uses the browser's Web Speech API** (`en-ZA`) and the button is
+  hidden where it is unsupported. In Chrome the audio is processed by Google's
+  speech service, which is worth stating in the privacy notice before launch.
+- **Not verified in a browser:** the camera/photo picker, dictation and the
+  bottom sheet were exercised only through component tests.

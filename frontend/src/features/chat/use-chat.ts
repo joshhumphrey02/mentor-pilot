@@ -206,10 +206,14 @@ export function useChat({ conversationId, onConversationChange, onTurnEnd }: Use
   )
 
   const send = useCallback(
-    (text: string) => {
+    (text: string, attachmentIds: string[] = []) => {
       const trimmed = text.trim()
       if (!trimmed) return
-      void run(`/api/v1/conversations/${conversationId}/messages`, { text: trimmed }, trimmed)
+      void run(
+        `/api/v1/conversations/${conversationId}/messages`,
+        { text: trimmed, attachment_ids: attachmentIds },
+        trimmed,
+      )
     },
     [conversationId, run],
   )
