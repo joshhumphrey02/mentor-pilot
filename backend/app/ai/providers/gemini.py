@@ -3,6 +3,7 @@
 import base64
 import uuid
 from collections.abc import AsyncIterator, Sequence
+from typing import cast
 
 import httpx
 from google import genai
@@ -156,7 +157,10 @@ class GeminiProvider:
 
         try:
             stream = await self._client.aio.models.generate_content_stream(
-                model=model, contents=_to_contents(messages, model), config=config
+                model=model,
+                # list[Content] is valid here; the SDK's union is just not covariant.
+                contents=cast("types.ContentListUnion", _to_contents(messages, model)),
+                config=config,
             )
             async for chunk in stream:
                 if chunk.prompt_feedback and chunk.prompt_feedback.block_reason:

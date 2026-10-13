@@ -104,7 +104,9 @@ async def send_message(
     `GET /messages/{assistant_message_id}` (the id arrives in `message_start`).
     """
     chat = get_chat(request)
-    turn = await chat.begin_turn(session, user, conversation_id, body.text)
+    turn = await chat.begin_turn(
+        session, user, conversation_id, body.text, attachment_ids=body.attachment_ids
+    )
     return _stream(chat, turn)
 
 

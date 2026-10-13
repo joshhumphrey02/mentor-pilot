@@ -11,6 +11,7 @@ from app.core.errors import AppError, PermissionDeniedError
 from app.core.security import verify_password
 from app.core.time import utcnow
 from app.models import (
+    Attachment,
     AuditLog,
     Conversation,
     EmailToken,
@@ -24,6 +25,7 @@ from app.models import (
 from app.schemas.user import OnboardingRequest, UserUpdate
 from app.services import audit, email, schools, sessions
 from app.services.email import Mailer
+from app.services.storage import Storage
 
 ADULT_AGE = 18
 MIN_AGE = 8
@@ -214,7 +216,9 @@ def _iso(value: Any) -> str | None:
     return value.isoformat() if value is not None else None
 
 
-async def delete_account(session: AsyncSession, user: User, *, password: str | None) -> None:
+async def delete_account(
+    session: AsyncSession, user: User, *, password: str | None, storage: Storage
+) -> None:
     """Erases personal data and closes the account (POPIA s24 deletion).
 
     The row is kept, anonymised, so that records which must outlive the account
@@ -227,7 +231,12 @@ async def delete_account(session: AsyncSession, user: User, *, password: str | N
     await session.execute(delete(EmailToken).where(EmailToken.user_id == user.id))
     # Audit details can hold personal data; the deletion itself is still recorded below.
     await session.execute(delete(AuditLog).where(AuditLog.user_id == user.id))
-    # Cascades to their conversations and messages.
+    # Uploaded photos live outside the database, so they are removed by hand.
+    uploads = await session.scalars(select(Attachment).where(Attachment.owner_id == user.id))
+    for upload in uploads:
+        await storage.delete(upload.storage_key)
+    await session.execute(delete(Attachment).where(Attachment.owner_id == user.id))
+    # Cascades to their conversations, messages, logbook, saved items and data.
     await session.execute(delete(Project).where(Project.owner_id == user.id))
     await session.execute(delete(ModerationFlag).where(ModerationFlag.user_id == user.id))
     if user.student_profile is not None:

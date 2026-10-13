@@ -25,6 +25,7 @@ from app.services import pathway
 from app.services.chat import ChatService
 from app.services.email import build_email_sender
 from app.services.google_oauth import HttpxGoogleOAuthClient
+from app.services.storage import build_storage
 
 API_PREFIX = "/api/v1"
 
@@ -80,7 +81,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
 
     app.state.ai = AIService(settings, ProviderRegistry(settings))
-    app.state.chat = ChatService(app.state.ai)
+    app.state.storage = build_storage(settings)
+    app.state.chat = ChatService(app.state.ai, app.state.storage)
 
     register_error_handlers(app)
     register_rate_limiter(app)

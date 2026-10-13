@@ -61,6 +61,7 @@ def settings(static_dir: Path) -> Settings:
             "log_level": "WARNING",
             "database_url": base.test_database_url,
             "static_dir": static_dir,
+            "upload_dir": static_dir.parent / "uploads",
             "public_base_url": "http://test",
             "google_client_id": "test-client-id",
             "google_client_secret": SecretStr("test-client-secret"),

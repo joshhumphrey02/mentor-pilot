@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
 
     static_dir: Path = BACKEND_DIR / "app" / "static"
+    # Uploaded files in dev. In prod this would be object storage (see services/storage.py).
+    upload_dir: Path = BACKEND_DIR / "uploads"
+    max_upload_bytes: int = 5 * 1024 * 1024
 
     # Where the app is reached by browsers. Used for links in emails and for
     # the Google OAuth redirect. In dev this is the Vite dev server.

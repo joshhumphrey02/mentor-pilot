@@ -63,7 +63,9 @@ async def delete_my_account(
     A POST rather than DELETE because it needs a body (the confirmation and
     password), which proxies are free to drop from DELETE requests.
     """
-    await user_service.delete_account(session, user, password=body.password)
+    await user_service.delete_account(
+        session, user, password=body.password, storage=request.app.state.storage
+    )
     response = Response(status_code=status.HTTP_204_NO_CONTENT)
     clear_auth_cookies(response, settings)
     return response

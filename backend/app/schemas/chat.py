@@ -68,6 +68,8 @@ class MessageOut(BaseModel):
 
 class SendMessageRequest(BaseModel):
     text: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=4000)]
+    # Photos uploaded beforehand with POST /projects/{id}/attachments.
+    attachment_ids: Annotated[list[uuid.UUID], Field(max_length=3)] = Field(default_factory=list)
 
 
 class FeedbackRequest(BaseModel):

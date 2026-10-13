@@ -14,17 +14,22 @@ from app.models.project import (
 from app.models.school import School
 from app.models.token import EmailToken, EmailTokenPurpose, RefreshToken
 from app.models.user import AuditLog, StudentProfile, User, UserRole
+from app.models.workspace import Attachment, ExperimentDataset, LogbookEntry, PinnedItem
 
 __all__ = [
     "AIUsage",
+    "Attachment",
     "AuditLog",
     "Conversation",
     "EmailToken",
     "EmailTokenPurpose",
+    "ExperimentDataset",
+    "LogbookEntry",
     "Message",
     "MessageRole",
     "MessageStatus",
     "ModerationFlag",
+    "PinnedItem",
     "Project",
     "ProjectStage",
     "ProjectStatus",

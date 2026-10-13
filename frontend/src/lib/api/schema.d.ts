@@ -47,6 +47,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/attachments/{attachment_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Photo */
+        get: operations["get_photo"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/forgot-password": {
         parameters: {
             query?: never;
@@ -268,6 +285,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/datasets/{dataset_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Dataset */
+        put: operations["update_dataset"];
+        post?: never;
+        /** Delete Dataset */
+        delete: operations["delete_dataset"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -283,6 +318,27 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/logbook/{entry_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Edit Logbook Entry
+         * @description Edits the text. The original date is kept: a logbook is a dated record.
+         */
+        put: operations["edit_logbook_entry"];
+        post?: never;
+        /** Delete Logbook Entry */
+        delete: operations["delete_logbook_entry"];
         options?: never;
         head?: never;
         patch?: never;
@@ -345,6 +401,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/pins/{pin_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Unpin */
+        delete: operations["unpin"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects": {
         parameters: {
             query?: never;
@@ -388,6 +461,26 @@ export interface paths {
         patch: operations["update_project"];
         trace?: never;
     };
+    "/api/v1/projects/{project_id}/attachments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload Photo
+         * @description Uploads a photo (of a sketch, circuit or setup) to attach to a message.
+         */
+        post: operations["upload_photo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{project_id}/conversations": {
         parameters: {
             query?: never;
@@ -400,6 +493,83 @@ export interface paths {
         put?: never;
         /** Create Conversation */
         post: operations["create_conversation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/datasets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Datasets */
+        get: operations["list_datasets"];
+        put?: never;
+        /** Create Dataset */
+        post: operations["create_dataset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/export.pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export Project Pdf
+         * @description A printable project summary: idea, progress, materials, data and logbook.
+         */
+        get: operations["export_project_pdf"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/logbook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Logbook */
+        get: operations["list_logbook"];
+        put?: never;
+        /** Add Logbook Entry */
+        post: operations["add_logbook_entry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/pins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Pins */
+        get: operations["list_pins"];
+        put?: never;
+        /**
+         * Pin Block
+         * @description Saves one block of a mentor reply (a diagram, circuit, materials list) to the project.
+         */
+        post: operations["pin_block"];
         delete?: never;
         options?: never;
         head?: never;
@@ -577,6 +747,20 @@ export interface components {
             /** From Stage */
             from_stage: string;
         };
+        /** AttachmentOut */
+        AttachmentOut: {
+            /** Content Type */
+            content_type: string;
+            /** Filename */
+            filename: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Size */
+            size: number;
+        };
         /** AuthProvidersResponse */
         AuthProvidersResponse: {
             /** Google */
@@ -585,7 +769,7 @@ export interface components {
         /** BlockCompleteEvent */
         BlockCompleteEvent: {
             /** Block */
-            block: components["schemas"]["MarkdownBlock"] | components["schemas"]["CalloutBlock"] | components["schemas"]["SuggestedRepliesBlock"] | components["schemas"]["ErrorBlock"] | components["schemas"]["IdeaCardsBlock"] | components["schemas"]["ComparisonTableBlock"] | components["schemas"]["DiagramBlock"] | components["schemas"]["ImageGalleryBlock"] | components["schemas"]["VideoCardsBlock"] | components["schemas"]["ChartBlock"] | components["schemas"]["ChecklistBlock"] | components["schemas"]["ExperimentPlanBlock"] | components["schemas"]["BomTableBlock"] | components["schemas"]["QuizBlock"] | components["schemas"]["CircuitBlock"] | components["schemas"]["StageTransitionBlock"];
+            block: components["schemas"]["MarkdownBlock"] | components["schemas"]["CalloutBlock"] | components["schemas"]["SuggestedRepliesBlock"] | components["schemas"]["ErrorBlock"] | components["schemas"]["IdeaCardsBlock"] | components["schemas"]["ComparisonTableBlock"] | components["schemas"]["DiagramBlock"] | components["schemas"]["ImageGalleryBlock"] | components["schemas"]["VideoCardsBlock"] | components["schemas"]["ChartBlock"] | components["schemas"]["ChecklistBlock"] | components["schemas"]["ExperimentPlanBlock"] | components["schemas"]["BomTableBlock"] | components["schemas"]["QuizBlock"] | components["schemas"]["CircuitBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["JudgeScorecardBlock"] | components["schemas"]["StageTransitionBlock"];
             /** Index */
             index: number;
         };
@@ -595,6 +779,14 @@ export interface components {
             index: number;
             /** Type */
             type: string;
+        };
+        /** Body_upload_photo */
+        Body_upload_photo: {
+            /**
+             * File
+             * @description A JPEG, PNG or WebP photo.
+             */
+            file: string;
         };
         /** BomItem */
         BomItem: {
@@ -961,6 +1153,37 @@ export interface components {
              */
             rows: number;
         };
+        /** DatasetIn */
+        DatasetIn: {
+            /** Columns */
+            columns: string[];
+            /** Rows */
+            rows: string[][];
+            /**
+             * Title
+             * @default
+             */
+            title: string;
+        };
+        /** DatasetOut */
+        DatasetOut: {
+            /** Columns */
+            columns: string[];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Rows */
+            rows: string[][];
+            /** Title */
+            title: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
         /** DeleteAccountRequest */
         DeleteAccountRequest: {
             /**
@@ -1189,6 +1412,24 @@ export interface components {
              */
             type: "idea_cards";
         };
+        /**
+         * ImageBlock
+         * @description A photo the learner attached to their message.
+         */
+        ImageBlock: {
+            /**
+             * Alt
+             * @default Photo from the learner
+             */
+            alt: string;
+            /** Attachment Id */
+            attachment_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "image";
+        };
         /** ImageGalleryBlock */
         ImageGalleryBlock: {
             /** Images */
@@ -1200,6 +1441,50 @@ export interface components {
              * @enum {string}
              */
             type: "image_gallery";
+        };
+        /** JudgeScorecardBlock */
+        JudgeScorecardBlock: {
+            /**
+             * Improvements
+             * @description Concrete things to practise before expo.
+             */
+            improvements: string[];
+            /** Scores */
+            scores: components["schemas"]["RubricScore"][];
+            /** Strengths */
+            strengths: string[];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "judge_scorecard";
+        };
+        /** LogbookEntryIn */
+        LogbookEntryIn: {
+            /** Text */
+            text: string;
+        };
+        /** LogbookEntryOut */
+        LogbookEntryOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Stage Key */
+            stage_key: string;
+            /** Text */
+            text: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** LoginRequest */
         LoginRequest: {
@@ -1224,7 +1509,7 @@ export interface components {
         /** MessageOut */
         MessageOut: {
             /** Blocks */
-            blocks: (components["schemas"]["MarkdownBlock"] | components["schemas"]["CalloutBlock"] | components["schemas"]["SuggestedRepliesBlock"] | components["schemas"]["ErrorBlock"] | components["schemas"]["IdeaCardsBlock"] | components["schemas"]["ComparisonTableBlock"] | components["schemas"]["DiagramBlock"] | components["schemas"]["ImageGalleryBlock"] | components["schemas"]["VideoCardsBlock"] | components["schemas"]["ChartBlock"] | components["schemas"]["ChecklistBlock"] | components["schemas"]["ExperimentPlanBlock"] | components["schemas"]["BomTableBlock"] | components["schemas"]["QuizBlock"] | components["schemas"]["CircuitBlock"] | components["schemas"]["StageTransitionBlock"])[];
+            blocks: (components["schemas"]["MarkdownBlock"] | components["schemas"]["CalloutBlock"] | components["schemas"]["SuggestedRepliesBlock"] | components["schemas"]["ErrorBlock"] | components["schemas"]["IdeaCardsBlock"] | components["schemas"]["ComparisonTableBlock"] | components["schemas"]["DiagramBlock"] | components["schemas"]["ImageGalleryBlock"] | components["schemas"]["VideoCardsBlock"] | components["schemas"]["ChartBlock"] | components["schemas"]["ChecklistBlock"] | components["schemas"]["ExperimentPlanBlock"] | components["schemas"]["BomTableBlock"] | components["schemas"]["QuizBlock"] | components["schemas"]["CircuitBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["JudgeScorecardBlock"] | components["schemas"]["StageTransitionBlock"])[];
             /**
              * Conversation Id
              * Format: uuid
@@ -1324,6 +1609,35 @@ export interface components {
             province: string;
             /** School Id */
             school_id?: string | null;
+        };
+        /** PinIn */
+        PinIn: {
+            /** Block Index */
+            block_index: number;
+            /**
+             * Message Id
+             * Format: uuid
+             */
+            message_id: string;
+        };
+        /** PinOut */
+        PinOut: {
+            /** Block */
+            block: components["schemas"]["MarkdownBlock"] | components["schemas"]["CalloutBlock"] | components["schemas"]["SuggestedRepliesBlock"] | components["schemas"]["ErrorBlock"] | components["schemas"]["IdeaCardsBlock"] | components["schemas"]["ComparisonTableBlock"] | components["schemas"]["DiagramBlock"] | components["schemas"]["ImageGalleryBlock"] | components["schemas"]["VideoCardsBlock"] | components["schemas"]["ChartBlock"] | components["schemas"]["ChecklistBlock"] | components["schemas"]["ExperimentPlanBlock"] | components["schemas"]["BomTableBlock"] | components["schemas"]["QuizBlock"] | components["schemas"]["CircuitBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["JudgeScorecardBlock"] | components["schemas"]["StageTransitionBlock"];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Message Id */
+            message_id: string | null;
+            /** Title */
+            title: string;
         };
         /** ProjectCreate */
         ProjectCreate: {
@@ -1473,6 +1787,24 @@ export interface components {
             /** Token */
             token: string;
         };
+        /** RubricScore */
+        RubricScore: {
+            /**
+             * Comment
+             * @description One specific, kind, honest remark.
+             */
+            comment: string;
+            /**
+             * Criterion
+             * @description What was judged, e.g. 'Understanding of the science', 'Method', 'Communication', 'Honesty about limitations'.
+             */
+            criterion: string;
+            /**
+             * Score
+             * @description 1 = needs a lot of work, 5 = excellent.
+             */
+            score: number;
+        };
         /** SchoolCreate */
         SchoolCreate: {
             /** Name */
@@ -1500,6 +1832,8 @@ export interface components {
         };
         /** SendMessageRequest */
         SendMessageRequest: {
+            /** Attachment Ids */
+            attachment_ids?: string[];
             /** Text */
             text: string;
         };
@@ -1808,6 +2142,55 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_photo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attachment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2625,6 +3008,106 @@ export interface operations {
             };
         };
     };
+    update_dataset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DatasetIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatasetOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_dataset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dataset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     health: {
         parameters: {
             query?: never;
@@ -2650,6 +3133,106 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthResponse"];
+                };
+            };
+        };
+    };
+    edit_logbook_entry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LogbookEntryIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogbookEntryOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_logbook_entry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2775,6 +3358,53 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["MessageOut"];
                 };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unpin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pin_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Unauthorized */
             401: {
@@ -3043,6 +3673,77 @@ export interface operations {
             };
         };
     };
+    upload_photo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_photo"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Request Entity Too Large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Unsupported Media Type */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_conversations: {
         parameters: {
             query?: {
@@ -3117,6 +3818,359 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ConversationOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_datasets: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatasetOut"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_dataset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DatasetIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatasetOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_project_pdf: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_logbook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogbookEntryOut"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_logbook_entry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LogbookEntryIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogbookEntryOut"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_pins: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PinOut"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pin_block: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PinIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PinOut"];
                 };
             };
             /** @description Unauthorized */

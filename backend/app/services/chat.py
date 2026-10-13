@@ -7,8 +7,9 @@ back, instead of the answer being lost.
 """
 
 import asyncio
+import base64
 import uuid
-from collections.abc import AsyncIterator, Callable
+from collections.abc import AsyncIterator, Callable, Sequence
 from dataclasses import dataclass
 from datetime import timedelta
 from typing import Any
@@ -23,6 +24,7 @@ from sse_starlette import ServerSentEvent
 from app.ai.blocks import (
     Block,
     ErrorBlock,
+    ImageBlock,
     MarkdownBlock,
     SuggestedRepliesBlock,
     block_strings,
@@ -49,6 +51,7 @@ from app.ai.types import (
     ChatMessage,
     Done,
     ErrorEvent,
+    ImageInput,
     ModerationResult,
     TextDelta,
     ToolCall,
@@ -60,6 +63,7 @@ from app.ai.types import (
 from app.core.errors import AppError, ConflictError
 from app.core.time import utcnow
 from app.models import (
+    Attachment,
     Conversation,
     Message,
     MessageRole,
@@ -80,7 +84,8 @@ from app.schemas.chat import (
     ToolStatusEvent,
     UsageOut,
 )
-from app.services import pathway, projects
+from app.services import pathway, projects, workspace
+from app.services.storage import Storage
 
 logger = structlog.get_logger(__name__)
 
@@ -177,8 +182,9 @@ def visible_text(blocks: list[Block]) -> str:
 
 
 class ChatService:
-    def __init__(self, ai: AIService) -> None:
+    def __init__(self, ai: AIService, storage: Storage) -> None:
         self.ai = ai
+        self.storage = storage
         self._session_factory: async_sessionmaker[AsyncSession] | None = None
         # Strong references: asyncio only keeps weak ones, and a turn must not
         # be garbage-collected halfway through.
@@ -235,15 +241,28 @@ class ChatService:
         )
 
     async def begin_turn(
-        self, session: AsyncSession, user: User, conversation_id: uuid.UUID, text: str
+        self,
+        session: AsyncSession,
+        user: User,
+        conversation_id: uuid.UUID,
+        text: str,
+        *,
+        attachment_ids: Sequence[uuid.UUID] = (),
     ) -> Turn:
         conversation, project = await self._claim(session, user, conversation_id)
         is_first = await projects.count_messages(session, conversation.id) == 0
 
+        photos: list[Block] = []
+        for attachment_id in attachment_ids:
+            attachment = await workspace.get_attachment(session, user, attachment_id)
+            if attachment.project_id != project.id:
+                raise AppError("That photo belongs to another project.", code="wrong_project")
+            photos.append(ImageBlock(attachment_id=str(attachment.id)))
+
         user_message = Message(
             conversation_id=conversation.id,
             role=MessageRole.USER.value,
-            blocks=dump_blocks([MarkdownBlock(text=text)]),
+            blocks=dump_blocks([MarkdownBlock(text=text), *photos]),
             raw=text,
         )
         session.add(user_message)
@@ -730,16 +749,47 @@ class ChatService:
                 .limit(HISTORY_LIMIT)
             )
         ).all()
-        history = [
-            ChatMessage(
-                role="user" if row.role == MessageRole.USER.value else "assistant", text=row.raw
-            )
-            for row in reversed(rows)
-        ]
+        can_see = self.ai.registry.get().supports("vision")
+        history: list[ChatMessage] = []
+        for index, row in enumerate(reversed(rows)):
+            if row.role != MessageRole.USER.value:
+                history.append(ChatMessage(role="assistant", text=row.raw))
+                continue
+            photo_ids = [b["attachment_id"] for b in row.blocks if b.get("type") == "image"]
+            text = row.raw
+            images: list[ImageInput] = []
+            if photo_ids and index == len(rows) - 1 and can_see:
+                # Only the newest message's photos are sent as images: they are
+                # the ones being asked about, and images are costly to resend.
+                images = await self._load_images(session, photo_ids)
+            elif photo_ids:
+                text += "\n\n[The learner attached a photo here. It is not shown again.]"
+            history.append(ChatMessage(role="user", text=text, images=images))
         # A conversation sent to a model has to open with the user.
         while history and history[0].role != "user":
             history.pop(0)
         return history
+
+    async def _load_images(
+        self, session: AsyncSession, attachment_ids: list[str]
+    ) -> list[ImageInput]:
+        images: list[ImageInput] = []
+        for attachment_id in attachment_ids:
+            attachment = await session.get(Attachment, uuid.UUID(attachment_id))
+            if attachment is None:
+                continue
+            try:
+                data = await self.storage.read(attachment.storage_key)
+            except OSError:
+                logger.warning("chat.attachment_missing", attachment_id=attachment_id)
+                continue
+            images.append(
+                ImageInput(
+                    media_type=attachment.content_type,
+                    data_base64=base64.b64encode(data).decode(),
+                )
+            )
+        return images
 
     async def _name_conversation(
         self, session: AsyncSession, turn: Turn, reply: str

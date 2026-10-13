@@ -356,6 +356,37 @@ class CircuitBlock(BaseModel):
     mistake: CircuitMistake | None = None
 
 
+class ImageBlock(BaseModel):
+    """A photo the learner attached to their message."""
+
+    type: Literal["image"] = "image"
+    attachment_id: str
+    alt: str = "Photo from the learner"
+
+
+class RubricScore(BaseModel):
+    criterion: Annotated[
+        str,
+        Field(
+            max_length=60,
+            description="What was judged, e.g. 'Understanding of the science', 'Method', "
+            "'Communication', 'Honesty about limitations'.",
+        ),
+    ]
+    score: Annotated[int, Field(ge=1, le=5, description="1 = needs a lot of work, 5 = excellent.")]
+    comment: Annotated[str, Field(max_length=300, description="One specific, kind, honest remark.")]
+
+
+class JudgeScorecardBlock(BaseModel):
+    type: Literal["judge_scorecard"] = "judge_scorecard"
+    scores: Annotated[list[RubricScore], Field(min_length=3, max_length=6)]
+    strengths: Annotated[list[ShortStr], Field(min_length=1, max_length=4)]
+    improvements: Annotated[
+        list[ShortStr],
+        Field(min_length=1, max_length=4, description="Concrete things to practise before expo."),
+    ]
+
+
 class StageTransitionBlock(BaseModel):
     """A proposal to move on. The learner confirms it in the UI; nothing changes
     until they do. Once the project is at `to_stage` the card becomes a celebration."""
@@ -384,6 +415,8 @@ Block = Annotated[
     | BomTableBlock
     | QuizBlock
     | CircuitBlock
+    | ImageBlock
+    | JudgeScorecardBlock
     | StageTransitionBlock,
     Field(discriminator="type"),
 ]
@@ -401,7 +434,19 @@ def load_blocks(raw: list[dict[str, Any]]) -> list[Block]:
 
 
 _MACHINE_KEYS = frozenset(
-    {"type", "stage_key", "from_stage", "to_stage", "video_id", "id", "pins", "from", "to", "at"}
+    {
+        "type",
+        "stage_key",
+        "from_stage",
+        "to_stage",
+        "video_id",
+        "attachment_id",
+        "id",
+        "pins",
+        "from",
+        "to",
+        "at",
+    }
 )
 
 
