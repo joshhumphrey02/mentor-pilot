@@ -22,14 +22,20 @@ function withCsrf(request: Request): Request {
   return request
 }
 
-let refreshing: Promise<boolean> | null = null
+/** How an attempt to renew the session ended. */
+type Refresh = 'renewed' | 'signed-out' | 'unreachable'
+
+let refreshing: Promise<Refresh> | null = null
 
 /**
  * Swaps the refresh cookie for a new session. Calls made while one is already
  * in flight share it, because each refresh token can only be used once.
+ *
+ * Only the server saying so counts as signed out. A dropped connection, a
+ * restarting server or a rate limit says nothing about the session.
  */
-export function refreshSession(): Promise<boolean> {
-  refreshing ??= (async () => {
+export function refreshSession(): Promise<Refresh> {
+  refreshing ??= (async (): Promise<Refresh> => {
     try {
       const response = await globalThis.fetch(
         withCsrf(
@@ -40,15 +46,23 @@ export function refreshSession(): Promise<boolean> {
         ),
       )
       // 409: another tab refreshed a moment ago and already set new cookies.
-      return response.ok || response.status === 409
+      if (response.ok || response.status === 409) return 'renewed'
+      return response.status === 401 || response.status === 403 ? 'signed-out' : 'unreachable'
     } catch {
-      return false
+      return 'unreachable'
     } finally {
       refreshing = null
     }
   })()
   return refreshing
 }
+
+/** Stands in for a reply when the session could not be renewed for now. */
+const unreachable = () =>
+  Response.json(
+    { detail: "We couldn't reach Mentor Pilot. Check your connection and try again.", code: 'unavailable' },
+    { status: 503 },
+  )
 
 async function isStaleCookies(response: Response): Promise<boolean> {
   if (response.status !== 403) return false
@@ -68,7 +82,10 @@ export async function authFetch(request: Request): Promise<Response> {
     response = await globalThis.fetch(withCsrf(request))
   }
   if (response.status !== 401 || NO_REFRESH.test(new URL(request.url).pathname)) return response
-  if (!(await refreshSession())) return response
+  const refresh = await refreshSession()
+  if (refresh === 'signed-out') return response
+  // Passing the 401 on here would tell the app its user had signed out.
+  if (refresh === 'unreachable') return unreachable()
   return globalThis.fetch(withCsrf(retry))
 }
 

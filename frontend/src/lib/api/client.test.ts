@@ -61,6 +61,28 @@ describe('api client', () => {
     expect(await calls.at(-1)?.json()).toEqual({ full_name: 'Thandi' })
   })
 
+  it('does not mistake an unreachable server for being signed out', async () => {
+    mockApi({
+      'GET /api/v1/users/me': () => apiError(401, 'not_authenticated'),
+      // What a restarting server looks like through the dev proxy.
+      'POST /api/v1/auth/refresh': () => new Response('', { status: 500 }),
+    })
+
+    const { response, error } = await api.GET('/api/v1/users/me')
+
+    expect(response.status, 'a 401 here would log the user out of the app').toBe(503)
+    expect(error).toMatchObject({ code: 'unavailable' })
+  })
+
+  it('reports signed out only when the server says the session is over', async () => {
+    mockApi({
+      'GET /api/v1/users/me': () => apiError(401, 'not_authenticated'),
+      'POST /api/v1/auth/refresh': () => apiError(401, 'not_authenticated'),
+    })
+
+    expect((await api.GET('/api/v1/users/me')).response.status).toBe(401)
+  })
+
   it('shares one refresh between requests that expire together', async () => {
     let expired = true
     const { count } = mockApi({

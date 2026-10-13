@@ -19,7 +19,10 @@ export const meQueryOptions = queryOptions({
     return unwrap(result)
   },
   staleTime: 5 * 60_000,
-  retry: false,
+  // A visitor (401) is an answer, not a failure, and is never retried. Real
+  // failures are: the server may be restarting, so give it a few seconds.
+  retry: 4,
+  retryDelay: (attempt) => Math.min(500 * 2 ** attempt, 4000),
 })
 
 export const useMe = () => useQuery(meQueryOptions)

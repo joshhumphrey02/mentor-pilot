@@ -90,7 +90,10 @@ def _to_contents(messages: Sequence[ChatMessage], model: str) -> list[types.Cont
 
 def _wrap(exc: Exception) -> ProviderError:
     if isinstance(exc, errors.APIError):
-        return error_from_status(exc.code or 500, f"Gemini returned HTTP {exc.code}")
+        # The vendor's own explanation goes to the server log, never to a learner.
+        return error_from_status(
+            exc.code or 500, f"Gemini returned HTTP {exc.code}: {exc.message or ''}"
+        )
     return ProviderError("Could not reach Gemini", code="unavailable", retryable=True)
 
 

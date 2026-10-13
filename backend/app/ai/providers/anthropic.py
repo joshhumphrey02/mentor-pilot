@@ -98,7 +98,9 @@ def _to_tools(tools: Sequence[ToolSpec]) -> list[dict[str, Any]]:
 
 def _wrap(exc: anthropic.AnthropicError) -> ProviderError:
     if isinstance(exc, anthropic.APIStatusError):
-        return error_from_status(exc.status_code, f"Anthropic returned HTTP {exc.status_code}")
+        return error_from_status(
+            exc.status_code, f"Anthropic returned HTTP {exc.status_code}: {exc.message}"
+        )
     if isinstance(exc, anthropic.APIConnectionError):  # includes timeouts
         return ProviderError("Could not reach Anthropic", code="unavailable", retryable=True)
     return ProviderError("Anthropic request failed")
