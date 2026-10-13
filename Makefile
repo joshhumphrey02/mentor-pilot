@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 .PHONY: help install dev dev-backend dev-frontend db-up db-down migrate migration seed \
-        api-types test test-backend test-frontend lint typecheck format check build start
+        api-types test test-backend test-frontend e2e lint typecheck format check build start
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -45,6 +45,9 @@ test-backend:
 
 test-frontend:
 	cd frontend && npm test
+
+e2e: ## Browser test of the learner journey on a phone viewport (needs `make seed`)
+	cd frontend && npx playwright test
 
 lint: ## Lint both projects
 	cd backend && uv run ruff check . && uv run ruff format --check .

@@ -94,7 +94,8 @@ function DashboardPage() {
 
         {latest && (
           <section aria-labelledby="projects-heading" className="grid gap-3">
-            <div className="flex items-center justify-between gap-3">
+            {/* Wraps on narrow phones: the button is wider than the space beside the heading. */}
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 id="projects-heading" className="text-xl font-semibold">
                 Your projects
               </h2>

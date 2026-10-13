@@ -2,6 +2,7 @@ import type { QueryClient } from '@tanstack/react-query'
 import { createRootRouteWithContext, Link, Outlet } from '@tanstack/react-router'
 import { CompassIcon, TriangleAlertIcon } from 'lucide-react'
 
+import { OfflineBanner } from '@/components/offline-banner'
 import { Button } from '@/components/ui/button'
 import { Toaster } from '@/components/ui/sonner'
 
@@ -24,6 +25,7 @@ function RootLayout() {
       >
         Skip to content
       </a>
+      <OfflineBanner />
       <Outlet />
       <Toaster position="top-center" />
     </>

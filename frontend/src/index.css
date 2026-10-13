@@ -214,6 +214,17 @@
         @apply text-pretty;
     }
 
+    /*
+     * Grid and flex children default to "never narrower than my content", so
+     * a single long unbreakable line (a truncated title, a wide button) can
+     * push the whole page wider than a phone. Letting them shrink makes the
+     * text truncate or wrap instead. :where() keeps this at zero specificity,
+     * so any min-w-* utility still wins.
+     */
+    :where(.grid, .flex, .inline-flex) > * {
+        min-width: 0;
+    }
+
     button:not(:disabled),
     [role="button"]:not(:disabled) {
         cursor: pointer;

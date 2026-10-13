@@ -172,8 +172,9 @@ export default function CircuitView({ block, photos = true }: CircuitViewProps) 
           viewBox={`0 0 ${board.width} ${board.height}`}
           role="group"
           aria-label={`${block.title}: breadboard, ${mode === 'dont' ? 'showing a common mistake' : 'wired correctly'}`}
-          // Never narrower than 1:1, so holes stay tappable; wider boards scroll.
-          style={{ minWidth: Math.min(board.width, 340) }}
+          // Scales to the space available. Wide circuits scroll sideways
+          // rather than shrinking until the holes are too small to tap.
+          style={{ minWidth: Math.min(board.width, 280) }}
           className="mx-auto block h-auto w-full max-w-2xl select-none"
         >
           {/* The plastic body. */}

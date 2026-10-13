@@ -11,6 +11,7 @@ import {
 import { toast } from 'sonner'
 
 import { uploadPhoto } from '@/features/workspace/api'
+import { useOnline } from '@/hooks/use-online'
 import { useSpeechInput } from '@/hooks/use-speech-input'
 import { errorMessage } from '@/lib/api/errors'
 import { cn } from '@/lib/utils'
@@ -41,7 +42,8 @@ export function Composer({ projectId, onSend, busy, suggestions }: ComposerProps
   const input = useRef<HTMLTextAreaElement>(null)
   const picker = useRef<HTMLInputElement>(null)
   const uploading = photo !== null && photo.id === null
-  const canSend = (text.trim().length > 0 || photo?.id) && !busy && !uploading
+  const online = useOnline()
+  const canSend = (text.trim().length > 0 || photo?.id) && !busy && !uploading && online
 
   const speech = useSpeechInput(
     useCallback((heard: string) => setText((current) => `${current} ${heard}`.trim()), []),
@@ -168,7 +170,7 @@ export function Composer({ projectId, onSend, busy, suggestions }: ComposerProps
               value={text}
               rows={1}
               maxLength={MAX_LENGTH}
-              placeholder="Message your mentor"
+              placeholder={online ? 'Message your mentor' : "You're offline"}
               enterKeyHint="send"
               onChange={(event) => setText(event.target.value)}
               onKeyDown={onKeyDown}

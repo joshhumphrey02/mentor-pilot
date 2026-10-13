@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest'
 
-import { cleanup } from '@testing-library/react'
+import { cleanup, configure } from '@testing-library/react'
 import { afterEach, vi } from 'vitest'
 
 // jsdom does not implement matchMedia; components that adapt to screen size
@@ -26,6 +26,10 @@ globalThis.ResizeObserver ??= class {
 window.scrollTo = vi.fn() as unknown as typeof window.scrollTo
 // jsdom has no layout, so element scrolling is a no-op there.
 Element.prototype.scrollTo = vi.fn() as unknown as typeof Element.prototype.scrollTo
+
+// Whole-app tests load routes and lazy chunks on demand. A second is not
+// always enough on a busy machine, and a slow test is better than a flaky one.
+configure({ asyncUtilTimeout: 5000 })
 
 afterEach(() => {
   cleanup()

@@ -343,3 +343,41 @@ where the tooling forced a deviation. Newest phase last.
   up their types. A test now enforces uniqueness.
 - **The admin UI is functional rather than polished**, as the spec asks: tables
   and simple actions, with the learner experience as the priority.
+
+## Phase 9: Polish
+
+- **The end-to-end test found three real bugs that 460 unit tests had not.**
+  (1) A grid child holding one long non-wrapping line made the dashboard 28px
+  wider than the phone, which pushed the tab bar off screen. Grid and flex
+  children are now shrinkable by default (`index.css`). (2) A block the
+  learner was already using was re-created, losing its state, when the reply
+  finished streaming. The in-progress reply now keeps its React identity when
+  it is saved. (3) The breadboard was clipped on a 390px screen; on phones the
+  mentor's mark now sits above the reply so wide blocks get the full width.
+- **The e2e journey uses the seeded demo learner and the fake AI provider.** It
+  covers landing, login, dashboard, new project, the streamed breadboard and
+  its interactions, and persistence across a reload. It does not cover
+  registration and email verification, because the confirmation link only
+  exists in the server's console output; those flows are covered by API tests.
+- **Overflow is asserted against the visual viewport.** A mobile browser widens
+  the layout viewport to fit an over-wide page, so comparing `scrollWidth` to
+  `clientWidth` reports no overflow even when there is some.
+- **Colour contrast was checked by computing WCAG ratios for the token pairs**:
+  lowest 4.9:1 in light and 6.65:1 in dark (AA needs 4.5:1). That covers the
+  design tokens, not every combination that could be written in a component.
+  No screen-reader or automated axe audit was run.
+- **PWA:** the shell is precached, heavy on-demand chunks are cached on first
+  use, and recent project and conversation responses are cached network-first
+  for offline reading. That cache is deleted on logout and account deletion,
+  for shared phones. Sending is disabled while offline.
+- **The service worker, manifest and offline behaviour are unverified.** They
+  only exist in a production build, and builds were not run (project rule).
+  The same applies to the Dockerfile and to the Lighthouse target of 90+,
+  which has not been measured.
+- **App icons were generated from the logo SVG** with macOS tools. The same
+  512px image is used as the maskable icon; its mark may sit close to the safe
+  zone on some launchers.
+- **The landing page's breadboard demo is mounted only when scrolled near**, so
+  its code is not downloaded by visitors who leave early.
+- **Dark mode was not inspected visually.** Tokens exist for both themes and
+  pass the contrast check; the screenshots reviewed were light mode.

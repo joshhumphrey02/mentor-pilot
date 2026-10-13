@@ -34,3 +34,7 @@ backend/uploads/
 .vscode/*
 !.vscode/extensions.json
 *.log
+
+# Playwright
+test-results/
+playwright-report/

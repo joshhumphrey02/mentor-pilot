@@ -78,8 +78,10 @@ function UserBubble({ text, sending }: { text: string; sending?: boolean }) {
 
 function MentorRow({ children }: { children: ReactNode }) {
   return (
-    <div className="flex gap-3">
-      <LogoMark className="mt-0.5 size-7 shrink-0" />
+    // On phones the mark sits above the reply rather than beside it, so wide
+    // blocks (a breadboard, a table) get the full width of the screen.
+    <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+      <LogoMark className="size-6 shrink-0 sm:mt-0.5 sm:size-7" />
       <div className="grid min-w-0 flex-1 gap-3">{children}</div>
     </div>
   )
@@ -169,62 +171,72 @@ export function MessageList({
         <div ref={content} className="mx-auto grid w-full max-w-3xl gap-6 px-safe py-6">
           {isEmpty && empty}
 
-          {messages.map((message) =>
-            message.role === 'user' ? (
-              <div key={message.id} className="grid justify-items-end gap-2">
-                {message.blocks.map((block) =>
-                  block.type === 'image' ? (
-                    <BlockRenderer key={block.attachment_id} block={block} />
+          {/*
+            Saved messages and the reply in progress are one list of siblings,
+            and the reply keeps the same key (its message id) when it is saved.
+            React therefore keeps its blocks mounted across that moment, so a
+            learner already stepping through a breadboard while the rest of the
+            reply streams in does not have it reset under their fingers.
+          */}
+          {[
+            ...messages.map((message) =>
+              message.role === 'user' ? (
+                <div key={message.id} className="grid justify-items-end gap-2">
+                  {message.blocks.map((block) =>
+                    block.type === 'image' ? (
+                      <BlockRenderer key={block.attachment_id} block={block} />
+                    ) : null,
+                  )}
+                  <UserBubble
+                    text={message.blocks[0]?.type === 'markdown' ? message.blocks[0].text : ''}
+                  />
+                </div>
+              ) : (
+                <MentorRow key={message.id}>
+                  {message.blocks.map((block, index) => (
+                    // Blocks never reorder within a message.
+                    // oxlint-disable-next-line react/no-array-index-key
+                    <div key={index} className="grid min-w-0 gap-1">
+                      <BlockRenderer block={block} onRetry={onRegenerate} />
+                      {onSave && SAVEABLE.has(block.type) && (
+                        <SaveButton onSave={() => onSave(message.id, index)} />
+                      )}
+                    </div>
+                  ))}
+                  {message.status === 'complete' && !pending && (
+                    <MessageActions
+                      message={message}
+                      isLatest={message.id === lastId}
+                      onRegenerate={onRegenerate}
+                      onQuickReply={onQuickReply}
+                    />
+                  )}
+                </MentorRow>
+              ),
+            ),
+            pending?.userText ? <UserBubble key="sending" text={pending.userText} sending /> : null,
+            pending ? (
+              <MentorRow key={pending.assistantId ?? 'pending'}>
+                {pending.blocks.map((draft, index) =>
+                  draft ? (
+                    // oxlint-disable-next-line react/no-array-index-key
+                    <div key={index} className="grid min-w-0 gap-1">
+                      {draft.state === 'done' ? (
+                        <BlockRenderer block={draft.block} />
+                      ) : draft.state === 'writing' ? (
+                        <MarkdownBlock text={draft.text} streaming />
+                      ) : (
+                        <BlockSkeleton kind={draft.kind} />
+                      )}
+                    </div>
                   ) : null,
                 )}
-                <UserBubble
-                  text={message.blocks[0]?.type === 'markdown' ? message.blocks[0].text : ''}
-                />
-              </div>
-            ) : (
-              <MentorRow key={message.id}>
-                {message.blocks.map((block, index) => (
-                  // Blocks never reorder within a saved message.
-                  // oxlint-disable-next-line react/no-array-index-key
-                  <div key={index} className="grid min-w-0 gap-1">
-                    <BlockRenderer block={block} onRetry={onRegenerate} />
-                    {onSave && SAVEABLE.has(block.type) && (
-                      <SaveButton onSave={() => onSave(message.id, index)} />
-                    )}
-                  </div>
-                ))}
-                {message.status === 'complete' && !pending && (
-                  <MessageActions
-                    message={message}
-                    isLatest={message.id === lastId}
-                    onRegenerate={onRegenerate}
-                    onQuickReply={onQuickReply}
-                  />
+                {(pending.blocks.length === 0 || pending.toolStatus) && (
+                  <Thinking label={pending.toolStatus} />
                 )}
               </MentorRow>
-            ),
-          )}
-
-          {pending?.userText && <UserBubble text={pending.userText} sending />}
-
-          {pending && (
-            <MentorRow>
-              {pending.blocks.map((draft, index) => {
-                if (!draft) return null
-                // oxlint-disable-next-line react/no-array-index-key
-                if (draft.state === 'done') return <BlockRenderer key={index} block={draft.block} />
-                if (draft.state === 'writing') {
-                  // oxlint-disable-next-line react/no-array-index-key
-                  return <MarkdownBlock key={index} text={draft.text} streaming />
-                }
-                // oxlint-disable-next-line react/no-array-index-key
-                return <BlockSkeleton key={index} kind={draft.kind} />
-              })}
-              {(pending.blocks.length === 0 || pending.toolStatus) && (
-                <Thinking label={pending.toolStatus} />
-              )}
-            </MentorRow>
-          )}
+            ) : null,
+          ]}
         </div>
       </div>
 

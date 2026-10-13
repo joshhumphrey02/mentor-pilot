@@ -25,6 +25,8 @@ export interface PendingTurn {
   userText: string | null
   blocks: DraftBlock[]
   toolStatus: string | null
+  /** Known once the server has started the turn. Becomes the saved message's id. */
+  assistantId: string | null
 }
 
 const POLL_INTERVAL_MS = 1500
@@ -111,7 +113,7 @@ export function useChat({ conversationId, onConversationChange, onTurnEnd }: Use
     async (path: string, body: unknown, userText: string | null) => {
       if (draft.current) return
       setError(null)
-      draft.current = { userText, blocks: [], toolStatus: null }
+      draft.current = { userText, blocks: [], toolStatus: null, assistantId: null }
       setPending(draft.current)
       let assistantId: string | null = null
       let finished = false
@@ -123,6 +125,7 @@ export function useChat({ conversationId, onConversationChange, onTurnEnd }: Use
           case 'message_start': {
             const event = data as StreamEvents['message_start']
             assistantId = event.assistant_message_id
+            turn.assistantId = assistantId
             if (event.user_message) appendMessage(event.user_message)
             turn.userText = null
             break

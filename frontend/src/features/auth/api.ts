@@ -97,6 +97,7 @@ export function useLogout() {
     mutationFn: async () => unwrap(await api.POST('/api/v1/auth/logout')),
     // Drop everything cached for the previous user, not just their profile.
     onSettled: () => {
+      forgetOfflineData()
       queryClient.clear()
       queryClient.setQueryData(meQueryOptions.queryKey, null)
     },
@@ -127,10 +128,19 @@ export function useDeleteAccount() {
     mutationFn: async (body: Schemas['DeleteAccountRequest']) =>
       unwrap(await api.POST('/api/v1/users/me/delete', { body })),
     onSuccess: () => {
+      forgetOfflineData()
       queryClient.clear()
       queryClient.setQueryData(meQueryOptions.queryKey, null)
     },
   })
+}
+
+/**
+ * Removes the conversations the service worker saved for offline reading.
+ * On a shared phone the next person must not find the last learner's chats.
+ */
+function forgetOfflineData() {
+  if ('caches' in window) void caches.delete('api-recent').catch(() => undefined)
 }
 
 export const schoolSearchQueryOptions = (query: string) =>
