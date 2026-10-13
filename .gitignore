@@ -1,0 +1,36 @@
+# Secrets and local config
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+*.tsbuildinfo
+
+# Build output: the Vite build is written into the backend to be served by FastAPI
+backend/app/static/*
+!backend/app/static/.gitkeep
+frontend/dist/
+
+# Generated from the backend on demand (`make api-types`); the .d.ts is committed
+frontend/openapi.json
+
+# Local uploads (dev attachment storage)
+backend/uploads/
+
+# OS and editors
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.log
