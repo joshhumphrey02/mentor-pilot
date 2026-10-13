@@ -1,4 +1,4 @@
-import { act, screen } from '@testing-library/react'
+import { act, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -15,7 +15,7 @@ describe('landing page', () => {
     renderApp('/')
 
     expect(
-      await screen.findByRole('heading', { level: 1, name: /From an idea on paper to a project on the expo floor/ }),
+      await screen.findByRole('heading', { level: 1, name: 'Your idea, expo-ready.' }),
     ).toBeInTheDocument()
     expect(screen.getAllByRole('link', { name: /Start your project/ })[0]).toHaveAttribute('href', '/register')
     expect(screen.getByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/login')
@@ -42,18 +42,38 @@ describe('landing page', () => {
     expect(count('GET /api/v1/media/component-photo/led')).toBe(0)
   })
 
-  it('walks through the pathway by itself until a stage is picked', async () => {
+  it('shows all nine stages as photo cards, marking where a human mentor joins', async () => {
+    mockApi()
+    renderApp('/')
+
+    const stages = within(await screen.findByRole('list', { name: 'The nine stages of a project' }))
+    expect(stages.getAllByRole('listitem')).toHaveLength(9)
+    expect(stages.getByRole('heading', { name: 'Problem Discovery' })).toBeInTheDocument()
+    const handoff = stages.getByRole('heading', { name: 'Design and Prototyping' }).closest('li')
+    expect(handoff).toHaveTextContent('Stage 6')
+    expect(handoff).toHaveTextContent('A human mentor joins')
+  })
+
+  it('stops the hero slideshow once a visitor picks a photo', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true })
     mockApi()
     renderApp('/')
-    await screen.findByText('Stage 1 of 9')
+    const first = await screen.findByRole('button', { name: 'Show photo 1 of 4' })
+    expect(first).toHaveAttribute('aria-current', 'true')
 
-    await act(() => vi.advanceTimersByTimeAsync(2700))
-    expect(screen.getByText('Stage 2 of 9')).toBeInTheDocument()
+    await act(() => vi.advanceTimersByTimeAsync(5600))
+    expect(screen.getByRole('button', { name: 'Show photo 2 of 4' })).toHaveAttribute('aria-current', 'true')
 
-    await userEvent.click(screen.getByRole('button', { name: 'Stage 6: Design and Prototyping' }))
-    expect(screen.getByText('A human mentor joins here')).toBeInTheDocument()
-    await act(() => vi.advanceTimersByTimeAsync(6000))
-    expect(screen.getByText('Stage 6 of 9'), 'picking a stage stops the autoplay').toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Show photo 4 of 4' }))
+    await act(() => vi.advanceTimersByTimeAsync(12000))
+    expect(screen.getByRole('button', { name: 'Show photo 4 of 4' })).toHaveAttribute('aria-current', 'true')
+  })
+
+  it('credits the photographers', async () => {
+    mockApi()
+    renderApp('/')
+
+    expect(await screen.findByText(/Photos by .*ThisisEngineering.* on/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Unsplash' })).toHaveAttribute('href', 'https://unsplash.com')
   })
 })

@@ -12,6 +12,7 @@ import type { HelpType } from '@/features/mentoring/api'
 import { HelpTypePicker } from '@/features/mentoring/help-type-picker'
 import { api } from '@/lib/api/client'
 import { errorMessage, unwrap } from '@/lib/api/errors'
+import { PHOTOS } from '@/lib/photos'
 
 export const Route = createFileRoute('/_auth/register-mentor')({
   beforeLoad: requireGuest,
@@ -64,6 +65,8 @@ function RegisterMentorPage() {
     <AuthShell
       title="Become a mentor"
       subtitle="Help a learner turn a design into something real."
+      photo={PHOTOS.soldering}
+      tagline="Pass on what you know."
       footer={
         <>
           Are you a learner?{' '}

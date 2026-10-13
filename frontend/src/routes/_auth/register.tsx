@@ -12,6 +12,7 @@ import { GoogleButton } from '@/features/auth/components/google-button'
 import { requireGuest } from '@/features/auth/guards'
 import { registerSchema } from '@/features/auth/schemas'
 import { errorMessage } from '@/lib/api/errors'
+import { PHOTOS } from '@/lib/photos'
 import { zodResolver } from '@/lib/zod-resolver'
 
 export const Route = createFileRoute('/_auth/register')({
@@ -59,7 +60,8 @@ function RegisterPage() {
   return (
     <AuthShell
       title="Create your account"
-      subtitle="Free to start. Your mentor is ready when you are."
+      subtitle="Free to start."
+      photo={PHOTOS.learnerLaptop}
       footer={
         <>
           Already have an account? <Link className={linkClass} to="/login">Log in</Link>

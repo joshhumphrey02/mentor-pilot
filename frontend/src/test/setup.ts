@@ -23,6 +23,31 @@ globalThis.ResizeObserver ??= class {
   disconnect() {}
 }
 
+// Nor IntersectionObserver. With no layout everything counts as on screen, so
+// content that waits to be scrolled into view appears straight away.
+globalThis.IntersectionObserver ??= class {
+  readonly root = null
+  readonly rootMargin = ''
+  readonly thresholds = []
+  private readonly callback: IntersectionObserverCallback
+  constructor(callback: IntersectionObserverCallback) {
+    this.callback = callback
+  }
+  observe(target: Element) {
+    queueMicrotask(() =>
+      this.callback(
+        [{ isIntersecting: true, intersectionRatio: 1, target } as IntersectionObserverEntry],
+        this,
+      ),
+    )
+  }
+  unobserve() {}
+  disconnect() {}
+  takeRecords() {
+    return []
+  }
+}
+
 window.scrollTo = vi.fn() as unknown as typeof window.scrollTo
 // jsdom has no layout, so element scrolling is a no-op there.
 Element.prototype.scrollTo = vi.fn() as unknown as typeof Element.prototype.scrollTo

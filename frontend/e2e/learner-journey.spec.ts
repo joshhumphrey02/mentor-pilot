@@ -8,7 +8,7 @@ test('a learner logs in, starts a project and explores a breadboard on a phone',
   // The public landing page, with the demo that needs no account.
   await page.goto('/')
   await expect(
-    page.getByRole('heading', { level: 1, name: /From an idea on paper/ }),
+    page.getByRole('heading', { level: 1, name: 'Your idea, expo-ready.' }),
   ).toBeVisible()
   await expect(page).toHaveTitle('Mentor Pilot')
 

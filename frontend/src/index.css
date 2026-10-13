@@ -259,6 +259,11 @@
         padding-right: max(1rem, env(safe-area-inset-right));
     }
 
+    /* A photo drifting slowly closer, for the panel beside the sign-in forms. */
+    .animate-drift {
+        animation: drift 24s ease-in-out infinite alternate;
+    }
+
     /* Faint engineering-paper grid, used behind hero and empty states. */
     .bg-grid {
         background-image:
@@ -510,5 +515,14 @@
         50% {
             opacity: 0.7;
         }
+    }
+}
+
+@keyframes drift {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(1.1);
     }
 }

@@ -10,6 +10,7 @@ import { GoogleButton } from '@/features/auth/components/google-button'
 import { needsOnboarding, requireGuest, safeRedirect } from '@/features/auth/guards'
 import { loginSchema } from '@/features/auth/schemas'
 import { errorCode, errorMessage } from '@/lib/api/errors'
+import { PHOTOS } from '@/lib/photos'
 import { zodResolver } from '@/lib/zod-resolver'
 
 interface LoginSearch {
@@ -55,7 +56,9 @@ function LoginPage() {
   return (
     <AuthShell
       title="Welcome back"
-      subtitle="Log in to pick up your project where you left off."
+      subtitle="Pick up where you left off."
+      photo={PHOTOS.breadboardBuild}
+      tagline="Back to the workbench."
       footer={
         <>
           New here? <Link className={linkClass} to="/register">Create an account</Link>

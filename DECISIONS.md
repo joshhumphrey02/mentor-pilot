@@ -381,3 +381,25 @@ where the tooling forced a deviation. Newest phase last.
   its code is not downloaded by visitors who leave early.
 - **Dark mode was not inspected visually.** Tokens exist for both themes and
   pass the contrast check; the screenshots reviewed were light mode.
+
+## Landing and sign-in redesign
+
+- **Aceternity UI components are adapted, not installed.** The sources were
+  read from Aceternity's registry and rewritten in `components/aceternity/`
+  (images slider, flip words, resizable navbar, focus cards, Apple cards
+  carousel, card spotlight). The originals assume Next.js, Tabler icons and
+  fixed grey palettes; the adapted ones use this project's tokens, lucide
+  icons, plain `<img>`, and work with touch, keyboard and reduced motion.
+- **`motion` is now a dependency**, used only on the public pages (landing and
+  sign-in). The app itself still animates with CSS.
+- **Photos are hot-linked from Unsplash's image CDN** (`lib/photos.ts`), sized
+  per screen with `srcset`. Each was viewed before use; photographers are
+  credited in the landing footer and on the sign-in photo panel. Only photos
+  under the free Unsplash licence are used (no Unsplash+). They are not cached
+  for offline use, so the public pages show dark panels without a connection.
+  The CSP already allows `img-src https:`.
+- **Copy was cut hard**: the hero has a headline and two buttons; the "why not
+  a chatbot" section and the stage descriptions are gone from the landing
+  page. The nine stages are photo cards with titles only.
+- **Checked by screenshot** at 390 and 1440 wide in light mode: landing, log in,
+  register, mentor sign-up, forgot password. Dark mode was not inspected.
