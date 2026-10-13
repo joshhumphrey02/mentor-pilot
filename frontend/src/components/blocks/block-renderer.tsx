@@ -5,6 +5,7 @@ import { BomTableBlock } from './bom-table-block'
 import { CalloutBlock } from './callout-block'
 import { ChartBlock } from './chart-block'
 import { ChecklistBlock } from './checklist-block'
+import { CircuitBlock } from './circuit-block'
 import { ComparisonTableBlock } from './comparison-table-block'
 import { DiagramBlock } from './diagram-block'
 import { ErrorBlock } from './error-block'
@@ -50,6 +51,8 @@ export function BlockRenderer({ block, onRetry }: BlockRendererProps) {
       return <BomTableBlock block={block} />
     case 'quiz':
       return <QuizBlock block={block} />
+    case 'circuit':
+      return <CircuitBlock block={block} />
     case 'stage_transition':
       return <StageTransitionBlock block={block} />
     case 'suggested_replies':

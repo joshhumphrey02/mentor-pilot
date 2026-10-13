@@ -235,3 +235,43 @@ where the tooling forced a deviation. Newest phase last.
   inside the app arrives with experiment datasets in Phase 7.
 - **Not in this phase:** `render_circuit` (Phase 6), `judge_practice` (Phase 7)
   and `request_human_mentor` (Phase 8) are added with the features they need.
+
+## Phase 6: Signature visuals
+
+- **One circuit block holds both the correct wiring and an optional `mistake`**
+  rather than a `mode` field, so the Do/Don't switch has both versions to hand.
+- **Circuits are checked electrically on the server before they are shown.**
+  Models miscount breadboard holes, and a wrong circuit teaches the mistake.
+  The checks catch legs sharing a strip, dangling leads, a rail-to-rail short,
+  an LED with no resistor and two legs in one hole. They are construction
+  checks, not a circuit simulator: a reversed LED, for example, passes. The
+  `mistake` version is only checked for being drawable.
+- **Breadboard view only for now.** The spec also names a `schematic` view. The
+  block has no `view` field yet; a schematic renderer is a separate drawing
+  problem and was left out to do the breadboard properly.
+- **The board is the common half-size model** (30 columns, A-E and F-J, two
+  rails per side), the same in `backend/app/ai/circuits.py` and
+  `frontend/src/features/circuit/geometry.ts`. Rail holes may be written
+  `+top` or `+top:5`; friendly aliases (`+rail`, `GND`, `5V`) are normalised.
+- **The drawing is cropped to the columns in use** (minimum 12), so holes are
+  about 24px apart on a phone instead of 10. Both versions share one crop so
+  the picture does not jump when switching.
+- **Step-through text is generated from the wiring**, not written by the model,
+  so the words cannot disagree with the picture. The model adds an optional
+  teaching note per part.
+- **Parts are drawn from above, as they look pushed into the board**, and each
+  is a focusable control with a text label; the whole build is also available
+  as a text list. Board colours are those of the physical object and are not
+  themed.
+- **Animation is CSS, not the `motion` library.** The reveal, step placement and
+  LED glow are opacity and transform transitions, which need no JavaScript
+  library. `motion` has not been added; it can be if a later phase needs
+  gesture-driven animation.
+- **Component photos are looked up from Wikimedia Commons on first tap and
+  cached in memory per process.** A failed lookup is not cached.
+- **The fake provider has one canned demo**: asking how to connect an LED on a
+  breadboard produces the reference circuit, so the feature can be shown with
+  no API key.
+- **Verified by rendering.** There is no browser in the development
+  environment, so the SVG was rendered to an image and inspected in its Do,
+  Don't and Reveal states. Touch behaviour on a real phone is untested.

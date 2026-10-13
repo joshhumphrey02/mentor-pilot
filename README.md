@@ -116,6 +116,13 @@ lists, experiment plans and quizzes by calling tools in `backend/app/ai/tools`.
 Photo search (Wikimedia Commons) needs no key. Video search is offered only
 when `YOUTUBE_API_KEY` is set.
 
+**The breadboard.** `render_circuit` produces the interactive breadboard. The
+server checks every circuit electrically before showing it
+(`backend/app/ai/circuits.py`). To try it with no API key, set
+`AI_PROVIDER=fake` and ask "How do I connect an LED on a breadboard?". To add
+a component, add it to `COMPONENTS` there and to
+`frontend/src/features/circuit/library.tsx`.
+
 **Cost tracking.** Every AI call is written to `ai_usage` with its tokens and
 an estimated cost from `backend/app/ai/pricing.yaml`. Only Anthropic prices
 are filled in; add the models you run (see `.env.example`).

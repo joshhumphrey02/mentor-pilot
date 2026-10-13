@@ -429,3 +429,75 @@
         }
     }
 }
+
+/* The interactive breadboard. Colours are those of the physical object, so
+   they are fixed rather than themed. */
+@layer components {
+    .strips {
+        opacity: 0;
+        transition: opacity 500ms ease;
+    }
+    .strips.is-revealed {
+        opacity: 1;
+    }
+    .strip {
+        fill: #b9b4a9;
+        stroke: #8f897c;
+        stroke-width: 1;
+    }
+    .strip-live {
+        fill: #f6b93b;
+        stroke: #b7791f;
+    }
+    .strips.is-revealed .strip-live {
+        animation: strip-glow 1.8s ease-in-out infinite;
+    }
+    @keyframes strip-glow {
+        50% {
+            fill: #ffd97a;
+        }
+    }
+
+    .part {
+        transition:
+            opacity 350ms ease,
+            transform 350ms ease;
+    }
+    .part.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-10px);
+    }
+    /* The part just placed in step-through. */
+    .part.is-current {
+        filter: drop-shadow(0 0 5px rgb(59 67 214 / 0.9));
+    }
+    .part:focus-visible .focus-ring {
+        stroke: #3b43d6;
+        stroke-width: 2.5;
+        stroke-dasharray: 5 3;
+    }
+
+    .hole-ring {
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: ring-pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes ring-pulse {
+        50% {
+            transform: scale(1.25);
+            opacity: 0.45;
+        }
+    }
+
+    .led-glow {
+        opacity: 0.45;
+        filter: blur(7px);
+        animation: led-glow 2s ease-in-out infinite;
+    }
+    @keyframes led-glow {
+        50% {
+            opacity: 0.7;
+        }
+    }
+}
