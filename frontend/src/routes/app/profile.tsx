@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { DownloadIcon, LogOutIcon, MonitorIcon, MoonIcon, SunIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
@@ -10,6 +11,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useLogout, useUpdateProfile, useUser } from '@/features/auth/api'
 import { nameSchema } from '@/features/auth/schemas'
+import { usageQueryOptions } from '@/features/mentoring/api'
 import { DeleteAccount } from '@/features/profile/delete-account'
 import { errorMessage } from '@/lib/api/errors'
 import { cn } from '@/lib/utils'
@@ -54,6 +56,7 @@ function ProfilePage() {
   const theme = useThemeStore((state) => state.theme)
   const setTheme = useThemeStore((state) => state.setTheme)
   const profile = user.student_profile
+  const usage = useQuery(usageQueryOptions)
 
   const {
     register,
@@ -122,6 +125,31 @@ function ProfilePage() {
           </dl>
         )}
       </Section>
+
+      {usage.data && user.role === 'student' && (
+        <Section title="Your mentor this month">
+          <p className="text-sm text-muted-foreground">
+            You've had <strong className="text-foreground">{usage.data.used_this_month}</strong> of{' '}
+            {usage.data.free_per_month + usage.data.extra_credits} replies from your AI mentor this
+            month. It resets on the 1st.
+          </p>
+          <div
+            role="progressbar"
+            aria-label="Mentor replies used this month"
+            aria-valuemin={0}
+            aria-valuemax={usage.data.free_per_month + usage.data.extra_credits}
+            aria-valuenow={usage.data.used_this_month}
+            className="h-2 overflow-hidden rounded-full bg-muted"
+          >
+            <div
+              className="h-full rounded-full bg-primary"
+              style={{
+                width: `${Math.min(100, (usage.data.used_this_month / Math.max(1, usage.data.free_per_month + usage.data.extra_credits)) * 100)}%`,
+              }}
+            />
+          </div>
+        </Section>
+      )}
 
       <Section title="Appearance">
         <div role="radiogroup" aria-label="Theme" className="grid grid-cols-3 gap-2">

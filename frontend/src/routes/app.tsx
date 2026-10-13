@@ -1,7 +1,8 @@
 import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
 
 import { Logo } from '@/components/brand/logo'
-import { NAV_ITEMS } from '@/features/app-shell/nav'
+import { navFor } from '@/features/app-shell/nav'
+import { useUser } from '@/features/auth/api'
 import { requireOnboardedUser } from '@/features/auth/guards'
 
 export const Route = createFileRoute('/app')({
@@ -14,6 +15,7 @@ export const Route = createFileRoute('/app')({
  * where the four destinations sit under the thumb.
  */
 function AppLayout() {
+  const items = navFor(useUser().role)
   return (
     <div className="min-h-dvh md:grid md:grid-cols-[15rem_minmax(0,1fr)]">
       <aside className="sticky top-0 hidden h-dvh flex-col border-r bg-sidebar p-4 md:flex">
@@ -21,7 +23,7 @@ function AppLayout() {
           <Logo />
         </Link>
         <nav aria-label="Main" className="mt-8 grid gap-1">
-          {NAV_ITEMS.map(({ to, label, icon: Icon, exact }) => (
+          {items.map(({ to, label, icon: Icon, exact }) => (
             <Link
               key={to}
               to={to}
@@ -54,8 +56,8 @@ function AppLayout() {
         aria-label="Main"
         className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 pb-safe backdrop-blur md:hidden"
       >
-        <ul className="mx-auto grid h-16 max-w-md grid-cols-4">
-          {NAV_ITEMS.map(({ to, label, icon: Icon, exact }) => (
+        <ul className="mx-auto grid h-16 max-w-md auto-cols-fr grid-flow-col">
+          {items.map(({ to, label, icon: Icon, exact }) => (
             <li key={to}>
               <Link
                 to={to}

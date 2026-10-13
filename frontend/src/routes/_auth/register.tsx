@@ -63,6 +63,12 @@ function RegisterPage() {
       footer={
         <>
           Already have an account? <Link className={linkClass} to="/login">Log in</Link>
+          <span className="mt-2 block">
+            Want to help learners?{' '}
+            <Link className={linkClass} to="/register-mentor">
+              Become a mentor
+            </Link>
+          </span>
         </>
       }
     >

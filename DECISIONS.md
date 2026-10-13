@@ -309,3 +309,37 @@ where the tooling forced a deviation. Newest phase last.
   speech service, which is worth stating in the privacy notice before launch.
 - **Not verified in a browser:** the camera/photo picker, dictation and the
   bottom sheet were exercised only through component tests.
+
+## Phase 8: Mentor handoff and admin
+
+- **The AI offers a human mentor; the learner sends the request.** As with
+  stage changes, the model shows a card and nothing happens until the learner
+  acts. One open request per project.
+- **Mentors must be approved by an admin** before they can see or accept any
+  request. Sign-up is open; access to learners is not. This is a manual vetting
+  step: the app records the approval, it does not perform background checks.
+- **Learner and mentor see only each other's first name.** A request carries a
+  snapshot of the project (title, stage, idea, summary) instead of giving the
+  mentor access to the learner's conversations.
+- **Contact details are refused in learner-mentor messages** (phone numbers,
+  emails, links, social handles) and every message is moderated. The filter is
+  pattern-based and can be evaded by a determined person; it sets the norm and
+  catches the ordinary case. Meetings are meant to be arranged through the
+  school.
+- **Matching is by province and help type.** Admins can assign by hand.
+- **No real-time messaging.** An open thread polls every 15 seconds.
+- **Credits are counted, not enforced.** Each learner has a monthly allowance of
+  mentor replies (`FREE_TURNS_PER_MONTH`, default 200) plus any credits granted
+  in the ledger to them or their school. `ENFORCE_CREDITS` exists as a setting
+  but nothing reads it yet: with no way to pay, blocking would only lock
+  learners out.
+- **Payments are an interface with a stub** (`services/payments.py`). PayFast,
+  Yoco and Paystack are the candidates.
+- **Stage editing in the admin UI covers the goal and the mentoring
+  instructions.** The API also accepts the title, checklist and exit criteria.
+  Removing a checklist item leaves any existing ticks for it in place, unused.
+- **Endpoints must have unique function names.** They double as OpenAPI
+  operation ids; two `list_messages` functions made the generated client mix
+  up their types. A test now enforces uniqueness.
+- **The admin UI is functional rather than polished**, as the spec asks: tables
+  and simple actions, with the learner experience as the priority.

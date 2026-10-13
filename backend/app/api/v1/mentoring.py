@@ -149,7 +149,7 @@ async def cancel_request(
 
 
 @router.get("/mentor-requests/{request_id}/messages", response_model=list[MentorMessageOut])
-async def list_messages(
+async def list_thread_messages(
     request_id: uuid.UUID, user: CurrentUser, session: SessionDep
 ) -> list[MentorMessageOut]:
     found = await mentoring.get_request(session, user, request_id)
@@ -163,7 +163,7 @@ async def list_messages(
     responses=error_responses(400),
 )
 @limiter.limit("60/hour")
-async def send_message(
+async def send_thread_message(
     request: Request,
     request_id: uuid.UUID,
     body: MentorMessageIn,

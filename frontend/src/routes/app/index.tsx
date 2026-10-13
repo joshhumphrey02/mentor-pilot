@@ -1,18 +1,28 @@
 import { useQuery } from '@tanstack/react-query'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowRightIcon, LightbulbIcon } from 'lucide-react'
+import { createFileRoute, Link, redirect } from '@tanstack/react-router'
+import { ArrowRightIcon, CalendarDaysIcon, LightbulbIcon } from 'lucide-react'
 import { useState } from 'react'
 
 import { EmptyState } from '@/components/empty-state'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useUser } from '@/features/auth/api'
+import { meQueryOptions, useUser } from '@/features/auth/api'
 import { projectsQueryOptions } from '@/features/chat/api'
 import { NewProjectButton } from '@/features/chat/components/new-project-button'
 import { ProjectCard } from '@/features/chat/components/project-card'
+import { expoEventsQueryOptions } from '@/features/mentoring/api'
 import { stagePosition } from '@/features/pathway/stages'
 
-export const Route = createFileRoute('/app/')({ component: DashboardPage })
+export const Route = createFileRoute('/app/')({
+  beforeLoad: async ({ context }) => {
+    const user = await context.queryClient.ensureQueryData(meQueryOptions)
+    // A mentor's home is their requests; projects are a learner's thing.
+    if (user?.role === 'mentor') throw redirect({ to: '/app/mentor' })
+  },
+  component: DashboardPage,
+})
+
+const EXPO_DATE = new Intl.DateTimeFormat(undefined, { dateStyle: 'long' })
 
 function greeting(hour: number) {
   if (hour < 12) return 'Good morning'
@@ -28,6 +38,7 @@ function DashboardPage() {
   const projects = useQuery(projectsQueryOptions)
   const active = projects.data?.filter((project) => project.status === 'active') ?? []
   const [latest, ...others] = active
+  const expos = useQuery(expoEventsQueryOptions)
 
   return (
     <>
@@ -96,6 +107,27 @@ function DashboardPage() {
             ) : (
               others.map((project) => <ProjectCard key={project.id} project={project} />)
             )}
+          </section>
+        )}
+        {expos.data && expos.data.length > 0 && (
+          <section aria-labelledby="expos-heading" className="grid gap-3">
+            <h2 id="expos-heading" className="text-xl font-semibold">
+              Upcoming expos
+            </h2>
+            <ul className="grid gap-2">
+              {expos.data.map((expo) => (
+                <li key={expo.id} className="flex items-center gap-3 rounded-2xl border bg-card p-3">
+                  <CalendarDaysIcon aria-hidden="true" className="size-5 shrink-0 text-primary" />
+                  <span className="min-w-0">
+                    <span className="block truncate font-medium">{expo.name}</span>
+                    <span className="block truncate text-sm text-muted-foreground">
+                      {EXPO_DATE.format(new Date(`${expo.starts_on}T00:00:00`))}
+                      {expo.location ? ` · ${expo.location}` : ''}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
           </section>
         )}
       </div>

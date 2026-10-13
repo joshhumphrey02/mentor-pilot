@@ -744,15 +744,15 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List Messages */
-        get: operations["list_messages"];
+        /** List Thread Messages */
+        get: operations["list_thread_messages"];
         put?: never;
         /**
-         * Send Message
+         * Send Thread Message
          * @description A message between learner and mentor. No AI takes part, but every
          *     message is moderated, and contact details are refused.
          */
-        post: operations["send_message"];
+        post: operations["send_thread_message"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5297,7 +5297,7 @@ export interface operations {
             };
         };
     };
-    list_messages: {
+    list_thread_messages: {
         parameters: {
             query?: never;
             header?: never;
@@ -5355,7 +5355,7 @@ export interface operations {
             };
         };
     };
-    send_message: {
+    send_thread_message: {
         parameters: {
             query?: never;
             header?: never;

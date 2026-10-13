@@ -17,9 +17,11 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as AuthForgotPasswordRouteImport } from './routes/_auth/forgot-password'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
+import { Route as AuthRegisterMentorRouteImport } from './routes/_auth/register-mentor'
 import { Route as AuthResetPasswordRouteImport } from './routes/_auth/reset-password'
 import { Route as AuthVerifyEmailRouteImport } from './routes/_auth/verify-email'
 import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as AppAdminRouteImport } from './routes/app/admin'
 import { Route as AppMentorRouteImport } from './routes/app/mentor'
 import { Route as AppProfileRouteImport } from './routes/app/profile'
 import { Route as AppProjectsRouteImport } from './routes/app/projects'
@@ -64,6 +66,11 @@ const AuthRegisterRoute = AuthRegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthRegisterMentorRoute = AuthRegisterMentorRouteImport.update({
+  id: '/register-mentor',
+  path: '/register-mentor',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
@@ -77,6 +84,11 @@ const AuthVerifyEmailRoute = AuthVerifyEmailRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMentorRoute = AppMentorRouteImport.update({
@@ -108,8 +120,10 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof AuthForgotPasswordRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
+  '/register-mentor': typeof AuthRegisterMentorRoute
   '/reset-password': typeof AuthResetPasswordRoute
   '/verify-email': typeof AuthVerifyEmailRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/mentor': typeof AppMentorRoute
   '/app/profile': typeof AppProfileRoute
   '/app/projects': typeof AppProjectsRoute
@@ -123,8 +137,10 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof AuthForgotPasswordRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
+  '/register-mentor': typeof AuthRegisterMentorRoute
   '/reset-password': typeof AuthResetPasswordRoute
   '/verify-email': typeof AuthVerifyEmailRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/mentor': typeof AppMentorRoute
   '/app/profile': typeof AppProfileRoute
   '/app/projects': typeof AppProjectsRoute
@@ -141,8 +157,10 @@ export interface FileRoutesById {
   '/_auth/forgot-password': typeof AuthForgotPasswordRoute
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
+  '/_auth/register-mentor': typeof AuthRegisterMentorRoute
   '/_auth/reset-password': typeof AuthResetPasswordRoute
   '/_auth/verify-email': typeof AuthVerifyEmailRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/mentor': typeof AppMentorRoute
   '/app/profile': typeof AppProfileRoute
   '/app/projects': typeof AppProjectsRoute
@@ -159,8 +177,10 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/register'
+    | '/register-mentor'
     | '/reset-password'
     | '/verify-email'
+    | '/app/admin'
     | '/app/mentor'
     | '/app/profile'
     | '/app/projects'
@@ -174,8 +194,10 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/register'
+    | '/register-mentor'
     | '/reset-password'
     | '/verify-email'
+    | '/app/admin'
     | '/app/mentor'
     | '/app/profile'
     | '/app/projects'
@@ -191,8 +213,10 @@ export interface FileRouteTypes {
     | '/_auth/forgot-password'
     | '/_auth/login'
     | '/_auth/register'
+    | '/_auth/register-mentor'
     | '/_auth/reset-password'
     | '/_auth/verify-email'
+    | '/app/admin'
     | '/app/mentor'
     | '/app/profile'
     | '/app/projects'
@@ -267,6 +291,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRegisterRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/register-mentor': {
+      id: '/_auth/register-mentor'
+      path: '/register-mentor'
+      fullPath: '/register-mentor'
+      preLoaderRoute: typeof AuthRegisterMentorRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/reset-password': {
       id: '/_auth/reset-password'
       path: '/reset-password'
@@ -286,6 +317,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/admin': {
+      id: '/app/admin'
+      path: '/admin'
+      fullPath: '/app/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/mentor': {
@@ -323,6 +361,7 @@ interface AuthRouteChildren {
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
+  AuthRegisterMentorRoute: typeof AuthRegisterMentorRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthVerifyEmailRoute: typeof AuthVerifyEmailRoute
 }
@@ -331,6 +370,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
+  AuthRegisterMentorRoute: AuthRegisterMentorRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthVerifyEmailRoute: AuthVerifyEmailRoute,
 }
@@ -338,6 +378,7 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface AppRouteChildren {
+  AppAdminRoute: typeof AppAdminRoute
   AppMentorRoute: typeof AppMentorRoute
   AppProfileRoute: typeof AppProfileRoute
   AppProjectsRoute: typeof AppProjectsRoute
@@ -345,6 +386,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAdminRoute: AppAdminRoute,
   AppMentorRoute: AppMentorRoute,
   AppProfileRoute: AppProfileRoute,
   AppProjectsRoute: AppProjectsRoute,

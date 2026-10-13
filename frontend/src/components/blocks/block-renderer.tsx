@@ -15,6 +15,7 @@ import { ImageBlock } from './image-block'
 import { ImageGalleryBlock } from './image-gallery-block'
 import { JudgeScorecardBlock } from './judge-scorecard-block'
 import { MarkdownBlock } from './markdown-block'
+import { MentorHandoffBlock } from './mentor-handoff-block'
 import { QuizBlock } from './quiz-block'
 import { StageTransitionBlock } from './stage-transition-block'
 import { VideoCardsBlock } from './video-cards-block'
@@ -59,6 +60,8 @@ export function BlockRenderer({ block, onRetry }: BlockRendererProps) {
       return <ImageBlock block={block} />
     case 'judge_scorecard':
       return <JudgeScorecardBlock block={block} />
+    case 'mentor_handoff':
+      return <MentorHandoffBlock block={block} />
     case 'stage_transition':
       return <StageTransitionBlock block={block} />
     case 'suggested_replies':
