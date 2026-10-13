@@ -1,4 +1,9 @@
-import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  type QueryClient,
+  queryOptions,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query'
 
 import { api, type Schemas } from '@/lib/api/client'
 import { unwrap } from '@/lib/api/errors'
@@ -9,6 +14,7 @@ export type Conversation = Schemas['ConversationOut']
 export type Message = Schemas['MessageOut']
 export type Block = Message['blocks'][number]
 export type StreamEvents = Schemas['ChatStreamEvents']
+export type Stage = Schemas['StageOut']
 
 export const projectsQueryOptions = queryOptions({
   queryKey: ['projects'] as const,
@@ -117,4 +123,74 @@ export function messageText(message: Pick<Message, 'blocks'>): string {
     .map((block) => (block.type === 'markdown' || block.type === 'callout' ? block.text : ''))
     .filter(Boolean)
     .join('\n\n')
+}
+
+export const stagesQueryOptions = (projectId: string) =>
+  queryOptions({
+    queryKey: ['projects', projectId, 'stages'] as const,
+    queryFn: async () =>
+      unwrap(
+        await api.GET('/api/v1/projects/{project_id}/stages', {
+          params: { path: { project_id: projectId } },
+        }),
+      ),
+  })
+
+export function useSetChecklistItem(projectId: string) {
+  const queryClient = useQueryClient()
+  const key = stagesQueryOptions(projectId).queryKey
+  return useMutation({
+    mutationFn: async (item: { stageKey: string; itemKey: string; done: boolean }) =>
+      unwrap(
+        await api.PUT('/api/v1/projects/{project_id}/stages/{stage_key}/checklist/{item_key}', {
+          params: {
+            path: { project_id: projectId, stage_key: item.stageKey, item_key: item.itemKey },
+          },
+          body: { done: item.done },
+        }),
+      ),
+    // Optimistic, so the tick appears under the learner's finger.
+    onMutate: async (item) => {
+      await queryClient.cancelQueries({ queryKey: key })
+      const previous = queryClient.getQueryData(key)
+      queryClient.setQueryData(key, (stages) =>
+        stages?.map((stage) =>
+          stage.key === item.stageKey
+            ? {
+                ...stage,
+                checklist: stage.checklist.map((entry) =>
+                  entry.key === item.itemKey ? { ...entry, done: item.done } : entry,
+                ),
+              }
+            : stage,
+        ),
+      )
+      return { previous }
+    },
+    onError: (_error, _item, context) => queryClient.setQueryData(key, context?.previous),
+    onSuccess: (stages) => queryClient.setQueryData(key, stages),
+  })
+}
+
+export function useAdvanceStage(projectId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (fromStage: string) =>
+      unwrap(
+        await api.POST('/api/v1/projects/{project_id}/stages/advance', {
+          params: { path: { project_id: projectId } },
+          body: { from_stage: fromStage },
+        }),
+      ),
+    onSuccess: () => refreshProjects(queryClient),
+  })
+}
+
+/**
+ * Refetches everything about projects that is on screen. A turn can rename a
+ * project, move its stage or tick its checklist through the mentor's tools,
+ * and every project query lives under the `projects` key.
+ */
+export function refreshProjects(queryClient: QueryClient): Promise<void> {
+  return queryClient.invalidateQueries({ queryKey: projectsQueryOptions.queryKey })
 }

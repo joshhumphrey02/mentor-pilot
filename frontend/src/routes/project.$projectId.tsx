@@ -1,17 +1,19 @@
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeftIcon, HistoryIcon, XIcon } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import { ArrowLeftIcon, ChevronDownIcon, HistoryIcon, XIcon } from 'lucide-react'
+import { useCallback, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { useUser } from '@/features/auth/api'
 import { requireOnboardedUser } from '@/features/auth/guards'
-import { type Conversation, projectQueryOptions } from '@/features/chat/api'
+import { type Conversation, projectQueryOptions, refreshProjects } from '@/features/chat/api'
 import { Composer } from '@/features/chat/components/composer'
 import { ConversationDrawer } from '@/features/chat/components/conversation-drawer'
 import { MessageList } from '@/features/chat/components/message-list'
+import { StageSheet } from '@/features/chat/components/stage-sheet'
 import { Welcome } from '@/features/chat/components/welcome'
 import { useChat } from '@/features/chat/use-chat'
+import { WorkspaceContext } from '@/features/chat/workspace-context'
 import { PATHWAY_STAGES, stagePosition } from '@/features/pathway/stages'
 import { useVisualViewportHeight } from '@/hooks/use-visual-viewport'
 
@@ -63,8 +65,22 @@ function Workspace({ conversationId }: { conversationId: string }) {
     [queryClient, projectId],
   )
 
-  const chat = useChat({ conversationId, onConversationChange })
+  // The mentor's tools can rename the project, move its stage or tick its
+  // checklist during a turn, so refresh what is on screen when one ends.
+  const onTurnEnd = useCallback(() => void refreshProjects(queryClient), [queryClient])
+
+  const chat = useChat({ conversationId, onConversationChange, onTurnEnd })
+  const [stagesOpen, setStagesOpen] = useState(false)
   const stage = stagePosition(project.current_stage)
+  const workspace = useMemo(
+    () => ({
+      projectId,
+      currentStage: project.current_stage,
+      send: chat.send,
+      busy: chat.isResponding,
+    }),
+    [projectId, project.current_stage, chat.send, chat.isResponding],
+  )
   const latest = chat.messages.at(-1)
   const suggestions =
     latest?.role === 'assistant'
@@ -78,20 +94,40 @@ function Workspace({ conversationId }: { conversationId: string }) {
       style={viewportHeight ? { height: viewportHeight } : undefined}
     >
       <header className="border-b bg-background pt-safe">
-        <div className="mx-auto flex h-14 w-full max-w-3xl items-center gap-1 px-2 sm:px-4">
+        <div className="mx-auto flex h-16 w-full max-w-3xl items-center gap-1 px-2 sm:px-4">
           <Button asChild variant="ghost" size="icon-touch">
             <Link to="/app/projects" aria-label="Back to projects">
               <ArrowLeftIcon />
             </Link>
           </Button>
-          <div className="min-w-0 flex-1 px-1">
+          {/* The stage track, collapsed to one line. Tapping it opens the pathway. */}
+          <button
+            type="button"
+            onClick={() => setStagesOpen(true)}
+            aria-haspopup="dialog"
+            className="min-w-0 flex-1 rounded-xl px-2 py-1 text-left hover:bg-muted"
+          >
             <h1 className="truncate font-sans text-base font-semibold tracking-normal">
               {project.title}
             </h1>
-            <p className="truncate text-xs text-muted-foreground">
-              Stage {stage.number} of {PATHWAY_STAGES.length} · {stage.title}
-            </p>
-          </div>
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <span className="truncate">
+                Stage {stage.number} of {PATHWAY_STAGES.length} · {stage.title}
+              </span>
+              <ChevronDownIcon aria-hidden="true" className="size-3.5 shrink-0" />
+            </span>
+            <span
+              aria-hidden="true"
+              className="mt-1 flex gap-0.5"
+            >
+              {PATHWAY_STAGES.map((item, index) => (
+                <span
+                  key={item.key}
+                  className={`h-1 flex-1 rounded-full ${index < stage.number ? 'bg-primary' : 'bg-border'}`}
+                />
+              ))}
+            </span>
+          </button>
           <Button
             variant="ghost"
             size="icon-touch"
@@ -103,6 +139,7 @@ function Workspace({ conversationId }: { conversationId: string }) {
         </div>
       </header>
 
+      <WorkspaceContext value={workspace}>
       <main id="main" className="flex min-h-0 flex-1 flex-col">
         {chat.isLoading ? (
           <div role="status" className="grid flex-1 place-items-center text-muted-foreground">
@@ -145,6 +182,9 @@ function Workspace({ conversationId }: { conversationId: string }) {
 
         <Composer onSend={chat.send} busy={chat.isResponding} suggestions={suggestions} />
       </main>
+      </WorkspaceContext>
+
+      <StageSheet open={stagesOpen} onOpenChange={setStagesOpen} projectId={projectId} />
 
       <ConversationDrawer
         open={historyOpen}

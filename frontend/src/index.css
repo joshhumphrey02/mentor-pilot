@@ -401,3 +401,31 @@
         }
     }
 }
+
+@layer components {
+    /* Mermaid sizes its SVG in pixels; let it shrink to fit a phone. */
+    .diagram-svg svg {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .confetti-piece {
+        opacity: 0;
+        animation: confetti-fall 1.4s ease-out forwards;
+    }
+    @keyframes confetti-fall {
+        0% {
+            opacity: 1;
+            transform: translateY(-12px) rotate(0deg);
+        }
+        100% {
+            opacity: 0;
+            transform: translateY(150px) rotate(300deg);
+        }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .confetti-piece {
+            display: none;
+        }
+    }
+}

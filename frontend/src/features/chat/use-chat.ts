@@ -33,9 +33,11 @@ const POLL_LIMIT = 120
 interface UseChatOptions {
   conversationId: string
   onConversationChange?: (conversation: Conversation) => void
+  /** Called when a reply has been saved, whatever its outcome. */
+  onTurnEnd?: () => void
 }
 
-export function useChat({ conversationId, onConversationChange }: UseChatOptions) {
+export function useChat({ conversationId, onConversationChange, onTurnEnd }: UseChatOptions) {
   const queryClient = useQueryClient()
   const messagesKey = messagesQueryOptions(conversationId).queryKey
   const messages = useQuery(messagesQueryOptions(conversationId))
@@ -156,6 +158,7 @@ export function useChat({ conversationId, onConversationChange }: UseChatOptions
             appendMessage((data as StreamEvents['done']).message)
             finished = true
             finish()
+            onTurnEnd?.()
             return
           case 'conversation':
             onConversationChange?.((data as StreamEvents['conversation']).conversation)
@@ -192,13 +195,14 @@ export function useChat({ conversationId, onConversationChange }: UseChatOptions
             paint()
           }
           await recover(assistantId)
+          onTurnEnd?.()
         } else if (alive.current) {
           setError(errorMessage(caught))
         }
         finish()
       }
     },
-    [appendMessage, finish, onConversationChange, paint, recover],
+    [appendMessage, finish, onConversationChange, onTurnEnd, paint, recover],
   )
 
   const send = useCallback(

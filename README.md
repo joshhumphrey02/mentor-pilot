@@ -107,6 +107,15 @@ cd backend && AI_PROVIDER=gemini AI_MODEL=... GEMINI_API_KEY=... uv run pytest t
 **No API key yet?** Set `AI_PROVIDER=fake` and `AI_MODEL=fake` for canned
 replies, so the rest of the app can be used and developed.
 
+**The pathway.** Every project moves through nine stages. Their goals,
+checklists, exit criteria and mentoring instructions are data, in
+`backend/app/pathway/stages.yaml`, loaded into the database on first start.
+
+**Tools.** The mentor shows idea cards, diagrams, charts, photos, materials
+lists, experiment plans and quizzes by calling tools in `backend/app/ai/tools`.
+Photo search (Wikimedia Commons) needs no key. Video search is offered only
+when `YOUTUBE_API_KEY` is set.
+
 **Cost tracking.** Every AI call is written to `ai_usage` with its tokens and
 an estimated cost from `backend/app/ai/pricing.yaml`. Only Anthropic prices
 are filled in; add the models you run (see `.env.example`).

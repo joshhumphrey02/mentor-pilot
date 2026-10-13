@@ -190,3 +190,48 @@ where the tooling forced a deviation. Newest phase last.
 - **Demo accounts use `@demo.example.com`.** The email validator rejects
   reserved test domains such as `.test`, which made the first seeded accounts
   impossible to log in with.
+
+## Phase 5: Mentor intelligence
+
+- **Stage definitions ship as YAML and live in a table.** `pathway/stages.yaml`
+  is loaded into `stage_definitions` the first time the app starts with that
+  table empty. After that the table is the source of truth (admins edit it in
+  Phase 8) and the file is never re-applied, so edits survive restarts.
+- **The model proposes a stage change; the learner confirms it.** `advance_stage`
+  only shows a card. `POST /projects/{id}/stages/advance` moves the project,
+  and carries the stage the card was for, so a stale card cannot skip a stage.
+  `select_idea` is the one tool that moves a stage directly, because the spec
+  says it does and it only runs on the learner's explicit choice.
+- **Tool arguments are Pydantic models, and for display tools the arguments are
+  the block.** The model fills in the structure, the schema validates it and
+  the UI renders it. Invalid calls are returned to the model with the reasons,
+  so it can correct itself within the round limit (5 rounds; the last offers
+  no tools so the model must finish in words).
+- **Tool schemas are inlined** (no `$ref`/`$defs`) so one schema works across
+  all three providers.
+- **Past tool use is replayed to the model as `[Record: ...]` notes**, not as
+  tool calls. That keeps stored history provider-neutral and small, and the
+  prompt tells the model never to write such lines itself.
+- **The system prompt is built once per turn**, even though a tool may change
+  the stage mid-turn. Tool results tell the model what changed, and an
+  unchanging prompt keeps provider caching and thinking-block rules happy.
+- **Checklist blocks store only the stage key** and render live state, so a
+  tick made anywhere (in a message, in the pathway sheet, or by the mentor)
+  shows everywhere.
+- **Project memory is refreshed every 12 messages by the fast model**, across
+  all chats in the project, capped at 2000 characters. A failed refresh keeps
+  the old summary and is retried after the next turn.
+- **Photos come from Wikimedia Commons with a keyword filter.** Commons is an
+  open archive, not a children's collection; results whose title or
+  description match an unsuitable-content list are dropped, and such queries
+  are refused. This is a filter, not a guarantee. The model is told it has not
+  seen the photos, so it does not describe them.
+- **Video search exists only when `YOUTUBE_API_KEY` is set**; otherwise the tool
+  is not offered to the model at all. It uses strict safe search, and videos
+  play from the no-cookie domain only after a card is tapped.
+- **Mermaid runs in `strict` security mode**, since the diagram source is model
+  output. Mermaid and Recharts are separate lazy chunks.
+- **The experiment plan's data table is display-only for now.** Filling it in
+  inside the app arrives with experiment datasets in Phase 7.
+- **Not in this phase:** `render_circuit` (Phase 6), `judge_practice` (Phase 7)
+  and `request_human_mentor` (Phase 8) are added with the features they need.

@@ -99,7 +99,8 @@ describe('project workspace', () => {
     const callout = await screen.findByRole('note')
     expect(within(callout).getByText('Safety')).toBeInTheDocument()
     expect(within(callout).getByText('Always use a resistor.')).toBeInTheDocument()
-    expect(await screen.findByText('one way')).toBeInTheDocument()
+    // The Markdown renderer is a lazily loaded chunk, so bold text takes a moment longer.
+    expect(await screen.findByText('one way', undefined, { timeout: 5000 })).toBeInTheDocument()
 
     const chips = await screen.findByRole('list', { name: 'Suggested replies' })
     expect(within(chips).getByRole('button', { name: 'Why a resistor?' })).toBeInTheDocument()
