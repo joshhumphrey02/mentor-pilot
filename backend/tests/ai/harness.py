@@ -91,88 +91,98 @@ class OpenAIHarness(_HttpHarness):
             http_client=httpx2.AsyncClient(transport=httpx2.MockTransport(self._handle2)),
         )
 
-    @staticmethod
-    def _chunk(delta: dict[str, Any], finish: str | None = None) -> dict[str, Any]:
-        return {
-            "id": "chatcmpl-1",
-            "object": "chat.completion.chunk",
-            "created": 1,
-            "model": MODEL,
-            "choices": [{"index": 0, "delta": delta, "finish_reason": finish}],
-        }
-
-    def _usage(self) -> dict[str, Any]:
-        return {
-            "id": "chatcmpl-1",
-            "object": "chat.completion.chunk",
-            "created": 1,
-            "model": MODEL,
-            "choices": [],
-            "usage": {
-                "prompt_tokens": INPUT_TOKENS,
-                "completion_tokens": OUTPUT_TOKENS,
-                "total_tokens": INPUT_TOKENS + OUTPUT_TOKENS,
-            },
-        }
+    def _finish(self, items: list[dict[str, Any]]) -> list[tuple[str | None, Any]]:
+        """The closing events of a Responses API stream that produced `items`."""
+        events: list[tuple[str | None, Any]] = [
+            (
+                "response.output_item.done",
+                {"type": "response.output_item.done", "output_index": index, "item": item},
+            )
+            for index, item in enumerate(items)
+        ]
+        events.append(
+            (
+                "response.completed",
+                {
+                    "type": "response.completed",
+                    "response": {
+                        "id": "resp_1",
+                        "object": "response",
+                        "model": MODEL,
+                        "status": "completed",
+                        "output": items,
+                        "usage": {
+                            "input_tokens": INPUT_TOKENS,
+                            "output_tokens": OUTPUT_TOKENS,
+                            "total_tokens": INPUT_TOKENS + OUTPUT_TOKENS,
+                        },
+                    },
+                },
+            )
+        )
+        return events
 
     def queue_text(self, chunks: list[str]) -> None:
         events: list[tuple[str | None, Any]] = [
-            (None, self._chunk({"role": "assistant", "content": ""}))
+            (
+                "response.output_text.delta",
+                {
+                    "type": "response.output_text.delta",
+                    "item_id": "msg_1",
+                    "output_index": 0,
+                    "content_index": 0,
+                    "delta": chunk,
+                },
+            )
+            for chunk in chunks
         ]
-        events += [(None, self._chunk({"content": chunk})) for chunk in chunks]
-        events += [(None, self._chunk({}, "stop")), (None, self._usage()), (None, "[DONE]")]
-        self._stream(events)
+        message = {
+            "type": "message",
+            "id": "msg_1",
+            "role": "assistant",
+            "status": "completed",
+            "content": [{"type": "output_text", "text": "".join(chunks), "annotations": []}],
+        }
+        self._stream(events + self._finish([message]))
 
     def queue_tool_call(self, name: str, arguments: dict[str, Any]) -> None:
-        raw = json.dumps(arguments)
-        half = len(raw) // 2
-
-        def call(fragment: dict[str, Any]) -> dict[str, Any]:
-            return self._chunk({"tool_calls": [{"index": 0, **fragment}]})
-
-        self._stream(
-            [
-                (
-                    None,
-                    call(
-                        {
-                            "id": "call_1",
-                            "type": "function",
-                            "function": {"name": name, "arguments": ""},
-                        }
-                    ),
-                ),
-                # Arguments arrive split mid-JSON, as they do for real.
-                (None, call({"function": {"arguments": raw[:half]}})),
-                (None, call({"function": {"arguments": raw[half:]}})),
-                (None, self._chunk({}, "tool_calls")),
-                (None, self._usage()),
-                (None, "[DONE]"),
-            ]
-        )
+        call = {
+            "type": "function_call",
+            "id": "fc_1",
+            "call_id": "call_1",
+            "name": name,
+            "arguments": json.dumps(arguments),
+            "status": "completed",
+        }
+        self._stream(self._finish([call]))
 
     def queue_error(self, status: int) -> None:
         self._json(status, {"error": {"message": "nope", "type": "error", "code": None}})
 
     def sent_system(self) -> str:
-        return next(m["content"] for m in self.last["messages"] if m["role"] == "system")
+        return str(self.last["instructions"])
 
     def sent_tool_names(self) -> list[str]:
-        return [tool["function"]["name"] for tool in self.last.get("tools", [])]
+        return [tool["name"] for tool in self.last.get("tools", [])]
 
     def sent_image_count(self) -> int:
         return sum(
-            part["type"] == "image_url"
-            for m in self.last["messages"]
-            if isinstance(m["content"], list)
-            for part in m["content"]
+            part["type"] == "input_image"
+            for item in self.last["input"]
+            if isinstance(item.get("content"), list)
+            for part in item["content"]
         )
 
     def sent_tool_result(self) -> str:
-        return next(m["content"] for m in self.last["messages"] if m["role"] == "tool")
+        return next(
+            str(item["output"])
+            for item in self.last["input"]
+            if item.get("type") == "function_call_output"
+        )
 
     def sent_roles(self) -> list[str]:
-        return [m["role"] for m in self.last["messages"]]
+        kinds = {"function_call": "assistant", "function_call_output": "tool"}
+        return [item.get("role") or kinds[item["type"]] for item in self.last["input"]]
 
 
 class AnthropicHarness(_HttpHarness):

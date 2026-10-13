@@ -1,3 +1,4 @@
+import os
 import re
 from collections.abc import AsyncIterator
 from pathlib import Path
@@ -8,6 +9,10 @@ from httpx import ASGITransport, AsyncClient
 from pydantic import SecretStr
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
+
+# The rate limiter picks its storage when it is imported. A developer's `.env`
+# may point at a real Redis; tests must count in memory, and start from zero.
+os.environ["REDIS_URL"] = ""
 
 from app.ai.providers.fake import FakeProvider
 from app.core.config import Settings
@@ -66,6 +71,12 @@ def settings(static_dir: Path) -> Settings:
             "google_client_id": "test-client-id",
             "google_client_secret": SecretStr("test-client-secret"),
             "smtp_host": None,
+            # Whatever a developer's `.env` holds, tests never call a real service.
+            "redis_url": None,
+            "openai_api_key": None,
+            "anthropic_api_key": None,
+            "gemini_api_key": None,
+            "youtube_api_key": None,
             # Most tests exercise the emailed-link flow, through a fake mailer.
             "email_verification": True,
             "ai_provider": "fake",

@@ -1,4 +1,8 @@
-"""OpenAI adapter (Chat Completions API)."""
+"""OpenAI adapter (Responses API).
+
+The Responses API rather than Chat Completions, because OpenAI's reasoning
+models only accept function tools there.
+"""
 
 import json
 from collections.abc import AsyncIterator, Sequence
@@ -15,6 +19,7 @@ from app.ai.types import (
     Feature,
     ModerationResult,
     ProviderEvent,
+    ProviderState,
     StopReason,
     TextDelta,
     ToolCall,
@@ -24,42 +29,51 @@ from app.ai.types import (
     UsageEvent,
 )
 
-_STOP_REASONS: dict[str, StopReason] = {
-    "stop": "end",
-    "tool_calls": "tool_calls",
-    "function_call": "tool_calls",
-    "length": "max_tokens",
+_INCOMPLETE_REASONS: dict[str, StopReason] = {
+    "max_output_tokens": "max_tokens",
     "content_filter": "refusal",
 }
 
 
-def _to_messages(system: str, messages: Sequence[ChatMessage]) -> list[dict[str, Any]]:
-    out: list[dict[str, Any]] = [{"role": "system", "content": system}] if system else []
+def _to_input(messages: Sequence[ChatMessage], model: str) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
     for message in messages:
         if message.role == "tool":
-            # One `tool` message per result; OpenAI matches them by call id.
+            # One output item per result; OpenAI matches them by call id.
             out.extend(
-                {"role": "tool", "tool_call_id": result.tool_call_id, "content": result.content}
+                {
+                    "type": "function_call_output",
+                    "call_id": result.tool_call_id,
+                    "output": result.content,
+                }
                 for result in message.tool_results
             )
         elif message.role == "assistant":
-            entry: dict[str, Any] = {"role": "assistant", "content": message.text or None}
-            if message.tool_calls:
-                entry["tool_calls"] = [
-                    {
-                        "id": call.id,
-                        "type": "function",
-                        "function": {"name": call.name, "arguments": json.dumps(call.arguments)},
-                    }
-                    for call in message.tool_calls
-                ]
-            out.append(entry)
+            state = message.provider_state
+            if state is not None and state.provider == "openai" and state.model == model:
+                # Replay the model's own items: its reasoning has to come back
+                # alongside the tool calls it led to.
+                out.extend(state.payload)
+                continue
+            if message.text:
+                out.append({"role": "assistant", "content": message.text})
+            out.extend(
+                {
+                    "type": "function_call",
+                    "call_id": call.id,
+                    "name": call.name,
+                    "arguments": json.dumps(call.arguments),
+                }
+                for call in message.tool_calls
+            )
         elif message.images:
-            parts: list[dict[str, Any]] = [{"type": "text", "text": message.text}]
+            parts: list[dict[str, Any]] = (
+                [{"type": "input_text", "text": message.text}] if message.text else []
+            )
             parts.extend(
                 {
-                    "type": "image_url",
-                    "image_url": {"url": f"data:{image.media_type};base64,{image.data_base64}"},
+                    "type": "input_image",
+                    "image_url": f"data:{image.media_type};base64,{image.data_base64}",
                 }
                 for image in message.images
             )
@@ -73,11 +87,11 @@ def _to_tools(tools: Sequence[ToolSpec]) -> list[dict[str, Any]]:
     return [
         {
             "type": "function",
-            "function": {
-                "name": tool.name,
-                "description": tool.description,
-                "parameters": tool.parameters,
-            },
+            "name": tool.name,
+            "description": tool.description,
+            "parameters": tool.parameters,
+            # Strict mode demands a narrower JSON Schema than the tools use.
+            "strict": False,
         }
         for tool in tools
     ]
@@ -85,7 +99,10 @@ def _to_tools(tools: Sequence[ToolSpec]) -> list[dict[str, Any]]:
 
 def _wrap(exc: openai.OpenAIError) -> ProviderError:
     if isinstance(exc, openai.APIStatusError):
-        return error_from_status(exc.status_code, f"OpenAI returned HTTP {exc.status_code}")
+        # The vendor's own explanation goes to the server log, never to a learner.
+        return error_from_status(
+            exc.status_code, f"OpenAI returned HTTP {exc.status_code}: {exc.message}"
+        )
     if isinstance(exc, openai.APIConnectionError):  # includes timeouts
         return ProviderError("Could not reach OpenAI", code="unavailable", retryable=True)
     return ProviderError("OpenAI request failed")
@@ -118,12 +135,12 @@ class OpenAIProvider:
         model = params["model"]
         if temperature is not None and model not in self._fixed_temperature:
             try:
-                return await self._client.chat.completions.create(**params, temperature=temperature)
+                return await self._client.responses.create(**params, temperature=temperature)
             except openai.BadRequestError as exc:
                 if "temperature" not in str(exc).lower():
                     raise
                 self._fixed_temperature.add(model)
-        return await self._client.chat.completions.create(**params)
+        return await self._client.responses.create(**params)
 
     async def stream_chat(
         self,
@@ -136,55 +153,74 @@ class OpenAIProvider:
     ) -> AsyncIterator[ProviderEvent]:
         params: dict[str, Any] = {
             "model": model,
-            "messages": _to_messages(system, messages),
-            "max_completion_tokens": max_tokens,
+            "input": _to_input(messages, model),
+            "max_output_tokens": max_tokens,
             "stream": True,
-            "stream_options": {"include_usage": True},
+            # Learners' conversations are not kept on OpenAI's side. That means
+            # reasoning has to travel with the request instead, encrypted.
+            "store": False,
+            "include": ["reasoning.encrypted_content"],
         }
+        if system:
+            params["instructions"] = system
         if tools:
             params["tools"] = _to_tools(tools)
 
         text: list[str] = []
-        # Tool calls arrive in fragments, keyed by their index in the response.
-        pending: dict[int, dict[str, str]] = {}
-        finish_reason = "stop"
-        usage = Usage()
+        items: list[Any] = []
+        final: Any = None
 
         try:
             stream = await self._open(params, temperature)
-            async for chunk in stream:
-                if chunk.usage is not None:
-                    usage = Usage(
-                        input_tokens=chunk.usage.prompt_tokens,
-                        output_tokens=chunk.usage.completion_tokens,
+            async for event in stream:
+                if event.type == "response.output_text.delta":
+                    text.append(event.delta)
+                    yield TextDelta(text=event.delta)
+                elif event.type == "response.output_item.done":
+                    items.append(event.item)
+                elif event.type in ("response.completed", "response.incomplete"):
+                    final = event.response
+                elif event.type == "response.failed":
+                    error = event.response.error
+                    raise ProviderError(
+                        f"OpenAI could not finish the response: {error.message if error else ''}",
+                        code="unavailable",
+                        retryable=True,
                     )
-                if not chunk.choices:
-                    continue
-                choice = chunk.choices[0]
-                if choice.finish_reason:
-                    finish_reason = choice.finish_reason
-                delta = choice.delta
-                if delta.content:
-                    text.append(delta.content)
-                    yield TextDelta(text=delta.content)
-                for fragment in delta.tool_calls or []:
-                    call = pending.setdefault(fragment.index, {"id": "", "name": "", "args": ""})
-                    if fragment.id:
-                        call["id"] = fragment.id
-                    if fragment.function and fragment.function.name:
-                        call["name"] = fragment.function.name
-                    if fragment.function and fragment.function.arguments:
-                        call["args"] += fragment.function.arguments
+                elif event.type == "error":
+                    raise ProviderError(
+                        f"OpenAI reported an error: {event.message}",
+                        code="unavailable",
+                        retryable=True,
+                    )
         except openai.OpenAIError as exc:
             raise _wrap(exc) from exc
+        if final is None:
+            raise ProviderError("OpenAI's response ended early", code="unavailable", retryable=True)
 
-        calls = [_finish_call(pending[index]) for index in sorted(pending)]
+        calls = [_finish_call(item) for item in items if item.type == "function_call"]
         for finished in calls:
             yield ToolCallEvent(call=finished)
-        yield UsageEvent(usage=usage)
+        usage = final.usage
+        yield UsageEvent(
+            usage=Usage(
+                input_tokens=usage.input_tokens if usage else 0,
+                # Includes the tokens spent reasoning, which are billed as output.
+                output_tokens=usage.output_tokens if usage else 0,
+            )
+        )
         yield Done(
-            stop_reason="tool_calls" if calls else _STOP_REASONS.get(finish_reason, "end"),
-            message=ChatMessage(role="assistant", text="".join(text), tool_calls=calls),
+            stop_reason=_stop_reason(final, items, calls),
+            message=ChatMessage(
+                role="assistant",
+                text="".join(text),
+                tool_calls=calls,
+                provider_state=ProviderState(
+                    provider=self.name,
+                    model=model,
+                    payload=[item.model_dump(mode="json", exclude_none=True) for item in items],
+                ),
+            ),
         )
 
     async def moderate(self, text: str) -> ModerationResult:
@@ -209,9 +245,21 @@ class OpenAIProvider:
             raise _wrap(exc) from exc
 
 
-def _finish_call(raw: dict[str, str]) -> ToolCall:
+def _stop_reason(final: Any, items: list[Any], calls: list[ToolCall]) -> StopReason:
+    if calls:
+        return "tool_calls"
+    if final.status == "incomplete":
+        reason = final.incomplete_details.reason if final.incomplete_details else None
+        return _INCOMPLETE_REASONS.get(reason or "", "end")
+    refused = any(
+        part.type == "refusal" for item in items if item.type == "message" for part in item.content
+    )
+    return "refusal" if refused else "end"
+
+
+def _finish_call(item: Any) -> ToolCall:
     try:
-        arguments = json.loads(raw["args"] or "{}")
+        arguments = json.loads(item.arguments or "{}")
     except json.JSONDecodeError as exc:
         # The model produced broken JSON; asking again usually fixes it.
         raise ProviderError(
@@ -221,4 +269,4 @@ def _finish_call(raw: dict[str, str]) -> ToolCall:
         raise ProviderError(
             "OpenAI returned a malformed tool call", code="malformed_tool_call", retryable=True
         )
-    return ToolCall(id=raw["id"], name=raw["name"], arguments=arguments)
+    return ToolCall(id=item.call_id, name=item.name, arguments=arguments)

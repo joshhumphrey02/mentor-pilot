@@ -182,7 +182,12 @@ class AIService:
         except ProviderError as exc:
             failure = exc
             logger.warning(
-                "ai.request_failed", provider=provider_name, model=model, task=task, code=exc.code
+                "ai.request_failed",
+                provider=provider_name,
+                model=model,
+                task=task,
+                code=exc.code,
+                detail=str(exc),
             )
             yield _error_event(exc)
         finally:

@@ -24,6 +24,25 @@ describe('api client', () => {
     expect(calls[1]?.headers.get('X-CSRF-Token')).toBe('token-123')
   })
 
+  it('retries once when the server clears cookies it no longer recognises', async () => {
+    let stale = true
+    const { calls } = mockApi({
+      'POST /api/v1/auth/login': () => {
+        if (!stale) return json(student)
+        stale = false
+        return apiError(403, 'csrf_failed')
+      },
+    })
+
+    const { response } = await api.POST('/api/v1/auth/login', {
+      body: { email: student.email, password: 'correct horse battery' },
+    })
+
+    expect(response.status).toBe(200)
+    expect(calls).toHaveLength(2)
+    expect(await calls[1]?.json()).toEqual({ email: student.email, password: 'correct horse battery' })
+  })
+
   it('refreshes an expired session once and retries the request with its body', async () => {
     let expired = true
     const { calls, count } = mockApi({

@@ -372,6 +372,28 @@ async def test_cookie_authenticated_writes_need_the_csrf_header(signed_in: Async
     assert ok.json()["full_name"] == "New Name"
 
 
+async def test_cookies_from_an_old_secret_key_are_cleared_so_login_works_again(
+    client: AsyncClient, outbox: Outbox
+) -> None:
+    await register_and_verify(client, outbox, email=EMAIL)
+    await client.post("/api/v1/auth/logout", headers=csrf(client))
+    # What a browser still holds after SECRET_KEY changes: a session and a CSRF
+    # token that this server no longer recognises.
+    client.cookies.set("mp_access", "signed-with-the-old-key")
+    client.cookies.set("mp_csrf", "old-nonce.old-signature")
+    credentials = {"email": EMAIL, "password": PASSWORD}
+    stale = {"x-csrf-token": "old-nonce.old-signature"}
+
+    refused = await client.post("/api/v1/auth/login", json=credentials, headers=stale)
+    assert (refused.status_code, refused.json()["code"]) == (403, "csrf_failed")
+    expired = [h for h in refused.headers.get_list("set-cookie") if "Max-Age=0" in h]
+    assert {h.split("=")[0] for h in expired} == {"mp_access", "mp_refresh", "mp_csrf"}
+
+    # The browser obeys and drops them; the same login then goes through.
+    client.cookies.clear()
+    assert (await client.post("/api/v1/auth/login", json=credentials)).status_code == 200
+
+
 async def test_csrf_token_must_be_signed_by_us(signed_in: AsyncClient) -> None:
     """An attacker who can plant a matching cookie and header still fails."""
     planted = "attacker-nonce.attacker-signature"

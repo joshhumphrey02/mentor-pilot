@@ -1,12 +1,18 @@
-"""Calls the real provider named by AI_PROVIDER. Skipped unless its key and
-AI_MODEL are set, so the normal test run never spends money.
+"""Calls the real provider named by AI_PROVIDER, which costs a little money.
 
-To confirm all three vendors, run it once per provider:
+Skipped unless RUN_LIVE_AI_TESTS=1, so the normal test run never spends
+anything even when `.env` holds a real key. It also needs that provider's key
+and AI_MODEL, from `.env` or the environment:
 
-    AI_PROVIDER=openai    AI_MODEL=... OPENAI_API_KEY=...    uv run pytest tests/ai/test_live.py
-    AI_PROVIDER=anthropic AI_MODEL=... ANTHROPIC_API_KEY=... uv run pytest tests/ai/test_live.py
-    AI_PROVIDER=gemini    AI_MODEL=... GEMINI_API_KEY=...    uv run pytest tests/ai/test_live.py
+    RUN_LIVE_AI_TESTS=1 uv run pytest tests/ai/test_live.py
+
+To confirm another vendor, name it for that run:
+
+    RUN_LIVE_AI_TESTS=1 AI_PROVIDER=anthropic AI_MODEL=... ANTHROPIC_API_KEY=... \
+        uv run pytest tests/ai/test_live.py
 """
+
+import os
 
 import pytest
 
@@ -29,6 +35,8 @@ ADD = ToolSpec(
 
 @pytest.fixture
 def live() -> AIService:
+    if os.environ.get("RUN_LIVE_AI_TESTS") != "1":
+        pytest.skip("live AI tests are opt-in: set RUN_LIVE_AI_TESTS=1")
     settings = Settings()
     if settings.ai_provider == "fake" or not settings.ai_model:
         pytest.skip("no live AI provider configured")

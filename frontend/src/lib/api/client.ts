@@ -50,10 +50,23 @@ export function refreshSession(): Promise<boolean> {
   return refreshing
 }
 
+async function isStaleCookies(response: Response): Promise<boolean> {
+  if (response.status !== 403) return false
+  const body: unknown = await response.clone().json().catch(() => null)
+  return (
+    typeof body === 'object' && body !== null && 'code' in body && body.code === 'csrf_failed'
+  )
+}
+
 /** fetch, plus the CSRF header, plus one silent retry after refreshing an expired session. */
 export async function authFetch(request: Request): Promise<Response> {
   const retry = request.clone()
-  const response = await globalThis.fetch(withCsrf(request))
+  let response = await globalThis.fetch(withCsrf(request.clone()))
+  if (await isStaleCookies(response)) {
+    // The server has just removed cookies it no longer recognises (its secret
+    // key changed). Without them the same request is judged on its own merits.
+    response = await globalThis.fetch(withCsrf(request))
+  }
   if (response.status !== 401 || NO_REFRESH.test(new URL(request.url).pathname)) return response
   if (!(await refreshSession())) return response
   return globalThis.fetch(withCsrf(retry))

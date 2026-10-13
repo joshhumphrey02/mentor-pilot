@@ -403,3 +403,22 @@ where the tooling forced a deviation. Newest phase last.
   page. The nine stages are photo cards with titles only.
 - **Checked by screenshot** at 390 and 1440 wide in light mode: landing, log in,
   register, mentor sign-up, forgot password. Dark mode was not inspected.
+
+## After the first real OpenAI key
+
+- **The OpenAI adapter uses the Responses API, not Chat Completions.** The
+  current reasoning models (`gpt-6.1-sol`) refuse function tools on Chat
+  Completions and cannot switch reasoning off. Requests set `store: false`, so
+  conversations are not kept by OpenAI, and carry the model's encrypted
+  reasoning back with tool results instead. Verified against the real API with
+  `gpt-6.1-sol` and `gpt-6-luna`: chat, a tool round trip, moderation, an
+  image, and one full mentor turn that drew a breadboard. Anthropic and Gemini
+  are still unverified against their real APIs.
+- **Live AI tests are opt-in** (`RUN_LIVE_AI_TESTS=1`). They used to run
+  whenever a key was present, which a real `.env` made true for every test run.
+  The test settings also blank out any keys and Redis URL found in `.env`.
+- **A CSRF failure caused by cookies this server did not sign clears them.**
+  Changing `SECRET_KEY` used to lock every browser with an old session out of
+  logging in until its cookies were deleted by hand. The client retries once.
+- **Accounts are confirmed automatically when there is no SMTP server**
+  (`EMAIL_VERIFICATION` overrides). Addresses are unproven until one exists.

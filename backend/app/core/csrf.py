@@ -7,7 +7,13 @@ from starlette.responses import JSONResponse
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from app.core.config import Settings
-from app.core.cookies import ACCESS_COOKIE, CSRF_COOKIE, CSRF_HEADER, REFRESH_COOKIE
+from app.core.cookies import (
+    ACCESS_COOKIE,
+    CSRF_COOKIE,
+    CSRF_HEADER,
+    REFRESH_COOKIE,
+    clear_auth_cookies,
+)
 from app.core.security import is_valid_csrf_token
 
 SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
@@ -52,15 +58,18 @@ class CSRFMiddleware:
 
         cookie_token = cookies.get(CSRF_COOKIE, "")
         header_token = headers.get(CSRF_HEADER, "")
-        if (
-            cookie_token
-            and header_token == cookie_token
-            and is_valid_csrf_token(self.settings, cookie_token)
-        ):
+        cookie_is_ours = bool(cookie_token) and is_valid_csrf_token(self.settings, cookie_token)
+        if cookie_is_ours and header_token == cookie_token:
             await self.app(scope, receive, send)
             return
 
         response = JSONResponse(
             {"detail": "CSRF token missing or invalid.", "code": "csrf_failed"}, status_code=403
         )
+        if not cookie_is_ours:
+            # The browser holds cookies this server did not sign, typically
+            # because SECRET_KEY has changed since they were set. No header
+            # could ever match them, so they are removed; otherwise the browser
+            # would be refused on every write, including logging in again.
+            clear_auth_cookies(response, self.settings)
         await response(scope, receive, send)
