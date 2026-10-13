@@ -57,6 +57,7 @@ class UserOut(BaseModel):
     is_verified: bool
     is_onboarded: bool
     has_password: bool
+    privacy_accepted: bool
     created_at: datetime
     student_profile: StudentProfileOut | None
 

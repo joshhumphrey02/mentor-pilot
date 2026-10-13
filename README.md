@@ -45,6 +45,18 @@ Then apply migrations:
 make migrate
 ```
 
+Load the demo accounts (optional):
+
+```sh
+make seed
+```
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Learner | `student@mentorpilot.test` | `mentorpilot-demo` |
+| Mentor | `mentor@mentorpilot.test` | `mentorpilot-demo` |
+| Admin | `admin@mentorpilot.test` | `mentorpilot-demo` |
+
 Configuration is optional in dev. To change anything, copy `.env.example` to
 `.env`; every variable is documented there.
 
@@ -57,6 +69,13 @@ make dev
 - App: http://localhost:5173 (Vite, with `/api` proxied to the backend)
 - API docs: http://localhost:8000/api/docs
 - Health: http://localhost:8000/api/v1/health
+
+**Emails in dev** are not sent: they are printed in the backend's terminal
+output. When you register, copy the confirmation link from there. To send real
+email, set the `SMTP_*` variables.
+
+**Sign in with Google** appears once `GOOGLE_CLIENT_ID` and
+`GOOGLE_CLIENT_SECRET` are set (see `.env.example` for the redirect URI).
 
 To run it the way production does (FastAPI serving the built frontend):
 
@@ -85,10 +104,11 @@ Run `make help` for the full list.
 backend/
   app/
     main.py        FastAPI app factory: mounts the API and the built SPA
-    core/          settings, logging, middleware, SPA serving
+    core/          settings, security, CSRF, rate limits, logging, SPA serving
     db/            engine, session, declarative base
-    api/v1/        routers
-    models/ schemas/ services/ ai/
+    api/v1/        thin routers (auth, users, schools, health)
+    services/      business logic (auth, sessions, email, onboarding)
+    models/ schemas/ ai/
     static/        Vite build output (git-ignored)
   alembic/         migrations
   scripts/         seed and OpenAPI export

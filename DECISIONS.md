@@ -83,3 +83,16 @@ where the tooling forced a deviation. Newest phase last.
 - **Rate limits are per IP address** and stored in Redis when `REDIS_URL` is
   set, in memory otherwise. In-memory limits are per process, so set
   `REDIS_URL` when running more than one worker.
+- **Selects are native `<select>` elements.** On phones they open the OS
+  picker, which is easier to use than a custom dropdown and costs no JavaScript.
+- **A small in-house zod resolver replaces `@hookform/resolvers`**, whose
+  optional peer dependencies pin zod 3 and conflict with the zod 4 that
+  TanStack Router needs.
+- **The onboarding form keeps every rule in one `superRefine`.** zod skips
+  object-level refinements when any field fails its own check, which let a
+  later step's empty field switch off the guardian rules on step one. A test
+  caught it.
+- **The privacy notice text is a first draft** written to match what the app
+  actually does. It needs legal review before launch.
+- **Projects and Mentor tabs are honest empty states** until Phases 4 and 8
+  fill them in.

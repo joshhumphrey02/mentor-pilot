@@ -1,9 +1,10 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { ArrowDownIcon } from 'lucide-react'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { ArrowRightIcon } from 'lucide-react'
 
 import { Logo } from '@/components/brand/logo'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
+import { useMe } from '@/features/auth/api'
 import { PATHWAY_STAGES } from '@/features/pathway/stages'
 import { SystemStatus } from '@/features/system/system-status'
 
@@ -13,12 +14,21 @@ export const Route = createFileRoute('/')({ component: HomePage })
 const HANDOFF_STAGE = 6
 
 function HomePage() {
+  const { data: user } = useMe()
+
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="pt-safe">
         <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-safe">
           <Logo />
-          <ThemeToggle />
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            {!user && (
+              <Button asChild variant="ghost" size="touch" className="px-3">
+                <Link to="/login">Log in</Link>
+              </Button>
+            )}
+          </div>
         </div>
       </header>
 
@@ -46,12 +56,24 @@ function HomePage() {
               problem, designing your experiment, testing it, and getting ready for the judges.
               When it's time to build, it connects you with a human mentor.
             </p>
-            <Button asChild size="touch" className="mt-8">
-              <a href="#pathway">
-                See the pathway
-                <ArrowDownIcon data-icon="inline-end" />
-              </a>
-            </Button>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="touch">
+                {user ? (
+                  <Link to="/app">
+                    Open your workspace
+                    <ArrowRightIcon data-icon="inline-end" />
+                  </Link>
+                ) : (
+                  <Link to="/register">
+                    Start your project
+                    <ArrowRightIcon data-icon="inline-end" />
+                  </Link>
+                )}
+              </Button>
+              <Button asChild variant="outline" size="touch">
+                <a href="#pathway">See the pathway</a>
+              </Button>
+            </div>
           </div>
         </section>
 
@@ -104,7 +126,10 @@ function HomePage() {
 
       <footer className="border-t pb-safe">
         <div className="mx-auto max-w-5xl px-safe py-6 text-sm text-muted-foreground">
-          Built for learners in the Western Cape, South Africa.
+          <p>Built for learners in the Western Cape, South Africa.</p>
+          <Link to="/privacy" className="mt-1 inline-block underline-offset-4 hover:underline">
+            Privacy notice
+          </Link>
         </div>
       </footer>
     </div>

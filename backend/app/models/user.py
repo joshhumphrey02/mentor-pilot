@@ -53,6 +53,10 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin, Base):
         return self.onboarded_at is not None
 
     @property
+    def privacy_accepted(self) -> bool:
+        return self.privacy_accepted_at is not None
+
+    @property
     def has_password(self) -> bool:
         return self.password_hash is not None
 

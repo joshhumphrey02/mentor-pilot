@@ -502,6 +502,8 @@ export interface components {
             is_verified: boolean;
             /** Preferred Language */
             preferred_language: string;
+            /** Privacy Accepted */
+            privacy_accepted: boolean;
             /** Role */
             role: string;
             student_profile: components["schemas"]["StudentProfileOut"] | null;
