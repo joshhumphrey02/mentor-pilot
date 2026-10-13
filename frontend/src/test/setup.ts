@@ -24,6 +24,8 @@ globalThis.ResizeObserver ??= class {
 }
 
 window.scrollTo = vi.fn() as unknown as typeof window.scrollTo
+// jsdom has no layout, so element scrolling is a no-op there.
+Element.prototype.scrollTo = vi.fn() as unknown as typeof Element.prototype.scrollTo
 
 afterEach(() => {
   cleanup()

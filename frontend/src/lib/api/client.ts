@@ -51,7 +51,7 @@ export function refreshSession(): Promise<boolean> {
 }
 
 /** fetch, plus the CSRF header, plus one silent retry after refreshing an expired session. */
-async function authFetch(request: Request): Promise<Response> {
+export async function authFetch(request: Request): Promise<Response> {
   const retry = request.clone()
   const response = await globalThis.fetch(withCsrf(request))
   if (response.status !== 401 || NO_REFRESH.test(new URL(request.url).pathname)) return response
@@ -68,3 +68,15 @@ export const api = createClient<paths>({
 })
 
 export type Schemas = components['schemas']
+
+/** Opens a streaming POST (Server-Sent Events) with the same auth handling as `api`. */
+export function openStream(path: string, body?: unknown): Promise<Response> {
+  return authFetch(
+    new Request(new URL(path, window.location.origin), {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { Accept: 'text/event-stream', 'Content-Type': 'application/json' },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    }),
+  )
+}

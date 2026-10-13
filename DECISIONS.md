@@ -145,3 +145,48 @@ where the tooling forced a deviation. Newest phase last.
   that once keys are set.
 - **`ai_usage.project_id` has no foreign key yet**; it gains one when projects
   arrive in Phase 4.
+
+## Phase 4: Chat core
+
+- **Callouts and suggested replies are written inline by the model as `:::`
+  directives; data-heavy blocks will come from tools (Phase 5).** A tool call
+  costs an extra model round trip, which is wasteful for a one-line callout
+  and for reply chips at the end of every message. A streaming parser turns
+  the directives into typed blocks and never lets raw syntax reach the screen.
+- **A turn runs in a background task, not in the request.** The HTTP response
+  only relays its events. If the connection drops, the reply still completes
+  and is saved, and the client polls `GET /messages/{id}` (the id arrives in
+  the first event) until it is ready.
+- **One turn per conversation is enforced in the database**: the conversation
+  row is locked while checking for a reply still marked `streaming`. A reply
+  stuck in that state for three minutes is treated as dead, so a crash cannot
+  lock a chat.
+- **Replies stream before output moderation has run**, then the saved message
+  replaces what was streamed. Holding the whole reply back until it was
+  checked would remove streaming entirely. A flagged reply is therefore
+  briefly visible on that one screen before being swapped for a redirect; it
+  is never saved or shown again. Input moderation does run first, so unsafe
+  input never reaches the model.
+- **History is rebuilt from each message's stored raw text**, most recent 40
+  messages. Blocked messages, failed replies and canned redirects are left
+  out. Older context will reach the model through the project memory summary
+  (Phase 5).
+- **Conversation titles come from the fast model** after the first exchange,
+  falling back to the learner's own opening words if that call fails.
+- **Regenerate replaces the latest reply** rather than keeping alternatives.
+- **Markdown images are disabled.** Images will only come through the gallery
+  block, whose sources we choose, not from URLs the model writes.
+- **The workspace is a full-screen route (`/project/$id`) without the tab bar**,
+  so the chat gets the whole height on a phone. Its height tracks the visual
+  viewport so the header and input stay on screen when the keyboard opens.
+- **Enter sends on a physical keyboard and makes a new line on touch screens**,
+  where there is a send button under the thumb.
+- **New project is one tap, with no form.** The mentor's first questions shape
+  the project, and it gets its real title when an idea is chosen.
+- **The event stream is documented in OpenAPI as `ChatStreamEvents`** so the
+  frontend's event payloads are generated types. The generated docs list its
+  content type as JSON rather than `text/event-stream`; the description says
+  what it really is.
+- **Demo accounts use `@demo.example.com`.** The email validator rejects
+  reserved test domains such as `.test`, which made the first seeded accounts
+  impossible to log in with.

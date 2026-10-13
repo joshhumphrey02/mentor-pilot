@@ -53,9 +53,9 @@ make seed
 
 | Role | Email | Password |
 | --- | --- | --- |
-| Learner | `student@mentorpilot.test` | `mentorpilot-demo` |
-| Mentor | `mentor@mentorpilot.test` | `mentorpilot-demo` |
-| Admin | `admin@mentorpilot.test` | `mentorpilot-demo` |
+| Learner | `student@demo.example.com` | `mentorpilot-demo` |
+| Mentor | `mentor@demo.example.com` | `mentorpilot-demo` |
+| Admin | `admin@demo.example.com` | `mentorpilot-demo` |
 
 Configuration is optional in dev. To change anything, copy `.env.example` to
 `.env`; every variable is documented there.
@@ -140,8 +140,8 @@ backend/
     main.py        FastAPI app factory: mounts the API and the built SPA
     core/          settings, security, CSRF, rate limits, logging, SPA serving
     db/            engine, session, declarative base
-    api/v1/        thin routers (auth, users, schools, health)
-    services/      business logic (auth, sessions, email, onboarding)
+    api/v1/        thin routers (auth, users, schools, projects, chat, admin)
+    services/      business logic (auth, sessions, onboarding, projects, chat turns)
     ai/            provider-neutral AI layer: adapters, registry, pricing, safety
     models/ schemas/
     static/        Vite build output (git-ignored)
@@ -152,6 +152,7 @@ frontend/
   src/
     routes/        file-based routes (TanStack Router)
     components/ui/ shadcn components
+    components/blocks/  one renderer per render-block type
     features/      feature modules
     lib/api/       typed API client generated from the OpenAPI schema
     stores/        Zustand stores

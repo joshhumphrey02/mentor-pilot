@@ -63,13 +63,13 @@ async def seed(session: AsyncSession) -> None:
         seeded.append(school)
 
     await _user(
-        session, email="admin@mentorpilot.test", full_name="Demo Admin", role=UserRole.ADMIN
+        session, email="admin@demo.example.com", full_name="Demo Admin", role=UserRole.ADMIN
     )
     await _user(
-        session, email="mentor@mentorpilot.test", full_name="Demo Mentor", role=UserRole.MENTOR
+        session, email="mentor@demo.example.com", full_name="Demo Mentor", role=UserRole.MENTOR
     )
     student = await _user(
-        session, email="student@mentorpilot.test", full_name="Thandi Mokoena", role=UserRole.STUDENT
+        session, email="student@demo.example.com", full_name="Thandi Mokoena", role=UserRole.STUDENT
     )
     if student.student_profile is None:
         now = utcnow()
@@ -82,7 +82,7 @@ async def seed(session: AsyncSession) -> None:
             learning_style="hands_on",
             date_of_birth=date(now.year - 16, 3, 14),
             guardian_consent=True,
-            guardian_email="guardian@mentorpilot.test",
+            guardian_email="guardian@demo.example.com",
             guardian_consent_at=now,
         )
         student.onboarded_at = now

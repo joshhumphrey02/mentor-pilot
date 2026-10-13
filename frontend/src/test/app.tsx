@@ -32,6 +32,7 @@ export const student = {
 const DEFAULTS: Handlers = {
   'GET /api/v1/users/me': () => apiError(401, 'not_authenticated'),
   'GET /api/v1/auth/providers': () => json({ google: false }),
+  'GET /api/v1/projects': () => json([]),
 }
 
 /** Replaces fetch with an in-memory API and records the requests made to it. */
@@ -70,4 +71,24 @@ export function renderApp(path: string) {
     </QueryClientProvider>,
   )
   return { router, queryClient }
+}
+
+/**
+ * A streaming Server-Sent Events response. Each event is sent as its own
+ * network chunk, split mid-way, so readers are tested against awkward boundaries.
+ */
+export function eventStream(events: [name: string, data: unknown][]): Response {
+  const encoder = new TextEncoder()
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) {
+      for (const [name, data] of events) {
+        const text = `event: ${name}\r\ndata: ${JSON.stringify(data)}\r\n\r\n`
+        const middle = Math.floor(text.length / 2)
+        controller.enqueue(encoder.encode(text.slice(0, middle)))
+        controller.enqueue(encoder.encode(text.slice(middle)))
+      }
+      controller.close()
+    },
+  })
+  return new Response(body, { headers: { 'content-type': 'text/event-stream' } })
 }
