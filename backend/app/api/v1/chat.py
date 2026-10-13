@@ -28,9 +28,9 @@ CHAT_LIMIT = "30/minute"
 # payload types for the frontend.
 STREAM_RESPONSES: dict[int | str, dict[str, Any]] = {
     200: {
+        "model": ChatStreamEvents,
         "description": "A Server-Sent Events stream. Each event's `data` is JSON; the "
-        "event names and payloads are the fields of ChatStreamEvents.",
-        "content": {"text/event-stream": {"schema": ChatStreamEvents.model_json_schema()}},
+        "event names and their payloads are the fields of ChatStreamEvents.",
     },
     **error_responses(409, 429),
 }
