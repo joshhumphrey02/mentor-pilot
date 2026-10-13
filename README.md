@@ -77,6 +77,40 @@ email, set the `SMTP_*` variables.
 **Sign in with Google** appears once `GOOGLE_CLIENT_ID` and
 `GOOGLE_CLIENT_SECRET` are set (see `.env.example` for the redirect URI).
 
+## The AI mentor
+
+The app talks to AI through one provider-neutral layer (`backend/app/ai`).
+Nothing outside `ai/providers/` imports a vendor SDK.
+
+**Switching provider** is configuration only:
+
+```sh
+AI_PROVIDER=gemini          # openai | anthropic | gemini | fake
+AI_MODEL=<that vendor's model id>
+AI_FAST_MODEL=<a cheaper model for titles and summaries>
+GEMINI_API_KEY=...
+```
+
+Restart the backend, then confirm it works. Log in as the admin and call:
+
+```sh
+GET  /api/v1/admin/ai/providers?check=true   # which keys are set, and do they work
+POST /api/v1/admin/ai/test-chat              # one message through the active provider
+```
+
+or run the live tests, which are skipped unless a key is set:
+
+```sh
+cd backend && AI_PROVIDER=gemini AI_MODEL=... GEMINI_API_KEY=... uv run pytest tests/ai/test_live.py
+```
+
+**No API key yet?** Set `AI_PROVIDER=fake` and `AI_MODEL=fake` for canned
+replies, so the rest of the app can be used and developed.
+
+**Cost tracking.** Every AI call is written to `ai_usage` with its tokens and
+an estimated cost from `backend/app/ai/pricing.yaml`. Only Anthropic prices
+are filled in; add the models you run (see `.env.example`).
+
 To run it the way production does (FastAPI serving the built frontend):
 
 ```sh
@@ -108,7 +142,8 @@ backend/
     db/            engine, session, declarative base
     api/v1/        thin routers (auth, users, schools, health)
     services/      business logic (auth, sessions, email, onboarding)
-    models/ schemas/ ai/
+    ai/            provider-neutral AI layer: adapters, registry, pricing, safety
+    models/ schemas/
     static/        Vite build output (git-ignored)
   alembic/         migrations
   scripts/         seed and OpenAPI export

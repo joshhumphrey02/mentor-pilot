@@ -96,3 +96,52 @@ where the tooling forced a deviation. Newest phase last.
   actually does. It needs legal review before launch.
 - **Projects and Mentor tabs are honest empty states** until Phases 4 and 8
   fill them in.
+
+## Phase 3: AI provider layer
+
+- **Adapters raise `ProviderError`; `AIService` turns it into the `Error`
+  event.** The spec lists `Error` among the stream events. Keeping raising
+  inside the adapter and conversion in one place means retry policy and
+  learner-facing wording live in the service, not in three adapters.
+- **Retries stop once the first event has been yielded.** A transient failure
+  before any output is retried with backoff (tenacity). After text has started
+  streaming, replaying would show the learner the same words twice, so the
+  stream ends with a friendly error instead.
+- **Assistant turns carry an opaque `provider_state`.** Claude's thinking blocks
+  and Gemini's thought signatures must be sent back exactly as received with
+  tool results. The neutral message shape cannot hold them, so each adapter
+  stashes its native turn and reuses it only when the same provider and model
+  see it again. History from a different provider falls back to plain text, so
+  switching `AI_PROVIDER` mid-conversation works.
+- **`temperature` is optional and not sent to Anthropic.** Current Claude models
+  reject non-default sampling parameters. The OpenAI adapter sends it and, if a
+  model rejects it, retries without and remembers.
+- **Anthropic: thinking is left at the model default and
+  `eager_input_streaming` is off.** We never display partial tool input, and
+  leaving it off means the API validates tool input against the schema.
+  Server-side refusal fallbacks are not enabled either, because the model id
+  comes from the environment and the feature is model-specific; a refusal is
+  surfaced as a `refusal` stop reason for the chat layer to handle kindly.
+- **OpenAI uses the Chat Completions API**, the most widely supported surface
+  for streaming with tools.
+- **Model ids and prices for OpenAI and Gemini are not filled in.** I could not
+  verify current ids or prices from a reliable source, so `.env.example` links
+  to each vendor's model page and `pricing.yaml` ships with Anthropic only.
+  Unpriced models record tokens with a null cost rather than a wrong one.
+- **Prices live in `pricing.yaml`, not code**, with an env override, so they can
+  change without a deploy of new logic.
+- **Health checks call each vendor's "list/get model" endpoint** rather than
+  generating text: it verifies the key (and, for the active provider, that
+  `AI_MODEL` exists) without spending tokens.
+- **Moderation fails closed by default.** If the check cannot be completed, the
+  message is blocked (`MODERATION_FAIL_CLOSED`). Providers without a
+  moderation endpoint ask the fast model to classify, with the text wrapped
+  and escaped so it cannot pose as instructions.
+- **A `fake` provider ships in the app, not just the tests**, so the product can
+  be run and demoed with no API key. It is refused in production.
+- **Adapters are tested against fake HTTP servers speaking each vendor's wire
+  format**, so the real SDKs' parsing is exercised. No live call was made
+  during development (no keys were available); `tests/ai/test_live.py` does
+  that once keys are set.
+- **`ai_usage.project_id` has no foreign key yet**; it gains one when projects
+  arrive in Phase 4.

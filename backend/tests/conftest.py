@@ -9,10 +9,14 @@ from pydantic import SecretStr
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.ai.providers.fake import FakeProvider
 from app.core.config import Settings
 from app.core.rate_limit import limiter
+from app.core.security import hash_password
+from app.core.time import utcnow
 from app.db.base import Base
 from app.main import create_app
+from app.models import User, UserRole
 from app.services.email import EmailMessage
 
 PASSWORD = "correct horse battery"
@@ -60,6 +64,10 @@ def settings(static_dir: Path) -> Settings:
             "google_client_id": "test-client-id",
             "google_client_secret": SecretStr("test-client-secret"),
             "smtp_host": None,
+            "ai_provider": "fake",
+            "ai_model": "fake-model",
+            "ai_fast_model": "fake-fast-model",
+            "ai_task_models": {},
         }
     )
 
@@ -83,6 +91,39 @@ async def _clean_state(app: FastAPI) -> AsyncIterator[None]:
     tables = ", ".join(f'"{table.name}"' for table in Base.metadata.sorted_tables)
     async with app.state.engine.begin() as connection:
         await connection.execute(text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE"))
+
+
+@pytest.fixture
+def fake_ai(app: FastAPI) -> FakeProvider:
+    """A fresh scripted provider installed as the app's active one."""
+    provider = FakeProvider()
+    app.state.ai.registry.register(provider)
+    return provider
+
+
+async def make_user(
+    db: AsyncSession, *, email: str, role: UserRole = UserRole.STUDENT, password: str = PASSWORD
+) -> User:
+    """Creates a verified, onboarded account directly, skipping the email flow."""
+    now = utcnow()
+    user = User(
+        email=email,
+        full_name="Test User",
+        role=role.value,
+        password_hash=await hash_password(password),
+        email_verified_at=now,
+        privacy_accepted_at=now,
+        onboarded_at=now,
+        student_profile=None,
+    )
+    db.add(user)
+    await db.commit()
+    return user
+
+
+async def login_as(client: AsyncClient, email: str, password: str = PASSWORD) -> None:
+    response = await client.post("/api/v1/auth/login", json={"email": email, "password": password})
+    assert response.status_code == 200, response.text
 
 
 @pytest.fixture

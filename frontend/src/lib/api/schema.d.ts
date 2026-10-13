@@ -4,6 +4,49 @@
  */
 
 export interface paths {
+    "/api/v1/admin/ai/providers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ai Providers
+         * @description Which AI providers have keys, which one is active, and (optionally) whether each works.
+         */
+        get: operations["ai_providers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/ai/test-chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ai Test Chat
+         * @description Sends one message through the active provider, end to end.
+         *
+         *     The quickest way to confirm a provider switch worked: change AI_PROVIDER,
+         *     restart, call this.
+         */
+        post: operations["ai_test_chat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/forgot-password": {
         parameters: {
             query?: never;
@@ -404,6 +447,23 @@ export interface components {
             /** School Id */
             school_id?: string | null;
         };
+        /** ProviderStatusOut */
+        ProviderStatusOut: {
+            /** Active */
+            active: boolean;
+            /** Configured */
+            configured: boolean;
+            /** Detail */
+            detail?: string | null;
+            /** Fast Model */
+            fast_model: string | null;
+            /** Healthy */
+            healthy?: boolean | null;
+            /** Model */
+            model: string | null;
+            /** Name */
+            name: string;
+        };
         /** RegisterRequest */
         RegisterRequest: {
             /**
@@ -473,6 +533,39 @@ export interface components {
             province: string | null;
             school: components["schemas"]["SchoolOut"] | null;
         };
+        /** TestChatRequest */
+        TestChatRequest: {
+            /**
+             * Message
+             * @default Say hello in five words.
+             */
+            message: string;
+            /**
+             * Task
+             * @default chat
+             * @enum {string}
+             */
+            task: "chat" | "title";
+        };
+        /** TestChatResponse */
+        TestChatResponse: {
+            /** Cost Usd */
+            cost_usd: string | null;
+            /** Error */
+            error?: string | null;
+            /** Input Tokens */
+            input_tokens: number;
+            /** Model */
+            model: string;
+            /** Ok */
+            ok: boolean;
+            /** Output Tokens */
+            output_tokens: number;
+            /** Provider */
+            provider: string;
+            /** Text */
+            text: string;
+        };
         /** TokenRequest */
         TokenRequest: {
             /** Token */
@@ -537,6 +630,107 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    ai_providers: {
+        parameters: {
+            query?: {
+                /** @description Also call each provider to verify it. */
+                check?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProviderStatusOut"][];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ai_test_chat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TestChatRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TestChatResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     forgot_password: {
         parameters: {
             query?: never;

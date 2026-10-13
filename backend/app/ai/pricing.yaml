@@ -1,0 +1,27 @@
+# USD per million tokens, used to estimate what each AI call costs.
+#
+# The longest matching `prefix` wins, so an entry for a model family covers
+# its dated snapshots too. A model with no entry is still tracked by token
+# count; its cost is simply recorded as unknown.
+#
+# Prices change. Check each provider's pricing page before relying on these
+# for billing, and add the models you actually run.
+#
+# Last checked: 2026-10 (Anthropic only).
+
+anthropic:
+  - { prefix: claude-opus-5-5, input: 4.00, output: 20.00 }
+  - { prefix: claude-sonnet-5-5, input: 2.00, output: 10.00 }
+  - { prefix: claude-haiku-5-5, input: 0.10, output: 0.50 }
+  - { prefix: claude-haiku-4-5, input: 1.00, output: 5.00 }
+
+# Not filled in: add the models you use from
+# https://platform.openai.com/docs/pricing
+openai: []
+
+# Not filled in: add the models you use from
+# https://ai.google.dev/gemini-api/docs/pricing
+gemini: []
+
+fake:
+  - { prefix: "", input: 0, output: 0 }

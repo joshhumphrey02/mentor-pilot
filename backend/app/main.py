@@ -9,6 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.routing import APIRoute
 
 from app import __version__
+from app.ai.registry import ProviderRegistry
+from app.ai.service import AIService
 from app.api.v1.router import api_router
 from app.core.config import Settings, get_settings
 from app.core.csrf import CSRFMiddleware
@@ -41,6 +43,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         engine = create_engine(settings)
         app.state.engine = engine
         app.state.session_factory = create_session_factory(engine)
+        app.state.ai.bind(app.state.session_factory)
         logger.info("app.started", environment=settings.environment, version=__version__)
         try:
             yield
@@ -64,6 +67,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.google_oauth = (
         HttpxGoogleOAuthClient(settings) if settings.google_oauth_enabled else None
     )
+
+    app.state.ai = AIService(settings, ProviderRegistry(settings))
 
     register_error_handlers(app)
     register_rate_limiter(app)

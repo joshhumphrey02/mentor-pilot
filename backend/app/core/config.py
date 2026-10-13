@@ -58,6 +58,30 @@ class Settings(BaseSettings):
     google_client_id: str | None = None
     google_client_secret: SecretStr | None = None
 
+    # --- AI -----------------------------------------------------------------
+    # Switching vendor is this one variable (plus that vendor's key and models).
+    ai_provider: Literal["openai", "anthropic", "gemini", "fake"] = "openai"
+    ai_model: str = ""
+    # A cheaper model for titles, summaries and classification.
+    ai_fast_model: str = ""
+    # Optional per-task model overrides, e.g. {"summary": "some-model-id"}.
+    ai_task_models: dict[str, str] = Field(default_factory=dict)
+    openai_api_key: SecretStr | None = None
+    anthropic_api_key: SecretStr | None = None
+    gemini_api_key: SecretStr | None = None
+    openai_moderation_model: str = "omni-moderation-latest"
+    ai_temperature: float = 0.7
+    ai_max_output_tokens: int = 4096
+    ai_request_timeout_seconds: float = 120.0
+    # Attempts per request, including the first, for rate limits and 5xx errors.
+    ai_max_attempts: int = 3
+    # If the moderation check itself fails, block the message rather than let
+    # it through unchecked. The users are minors, so this defaults to on.
+    moderation_fail_closed: bool = True
+    # USD per million tokens for AI_MODEL / AI_FAST_MODEL, overriding pricing.yaml.
+    ai_price_input_per_mtok: float | None = None
+    ai_price_output_per_mtok: float | None = None
+
     # --- Rate limits (slowapi syntax) ---------------------------------------
     rate_limit_enabled: bool = True
     rate_limit_auth: str = "10/minute"
@@ -86,6 +110,12 @@ class Settings(BaseSettings):
     def _require_real_secret_in_prod(self) -> Self:
         if self.is_prod and self.secret_key.get_secret_value() == INSECURE_DEV_SECRET:
             raise ValueError("SECRET_KEY must be set to a long random value in production")
+        return self
+
+    @model_validator(mode="after")
+    def _no_fake_ai_in_prod(self) -> Self:
+        if self.is_prod and self.ai_provider == "fake":
+            raise ValueError("AI_PROVIDER=fake is for development and tests only")
         return self
 
     @property
