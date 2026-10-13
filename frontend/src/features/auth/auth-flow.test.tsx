@@ -115,4 +115,22 @@ describe('register', () => {
     expect(await screen.findByRole('heading', { name: 'Check your inbox' })).toBeInTheDocument()
     expect(screen.getByText('thandi@example.com')).toBeInTheDocument()
   })
+
+  it('sends a new learner straight to log in when the server has no email to confirm with', async () => {
+    mockApi({
+      'GET /api/v1/auth/providers': () => json({ google: false, email_verification: false }),
+      'POST /api/v1/auth/register': () => json({ message: 'ok' }, 202),
+    })
+    renderApp('/register')
+
+    await userEvent.type(await screen.findByLabelText('Your name'), 'Thandi')
+    await userEvent.type(screen.getByLabelText('Email'), 'thandi@example.com')
+    await userEvent.type(screen.getByLabelText('Password'), 'correct horse battery')
+    await userEvent.click(screen.getByRole('checkbox'))
+    await userEvent.click(screen.getByRole('button', { name: 'Create account' }))
+
+    expect(await screen.findByRole('heading', { name: "You're all set" })).toBeInTheDocument()
+    expect(screen.queryByText(/inbox/i)).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/login')
+  })
 })

@@ -66,6 +66,8 @@ def settings(static_dir: Path) -> Settings:
             "google_client_id": "test-client-id",
             "google_client_secret": SecretStr("test-client-secret"),
             "smtp_host": None,
+            # Most tests exercise the emailed-link flow, through a fake mailer.
+            "email_verification": True,
             "ai_provider": "fake",
             "ai_model": "fake-model",
             "ai_fast_model": "fake-fast-model",

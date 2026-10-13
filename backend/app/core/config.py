@@ -110,6 +110,10 @@ class Settings(BaseSettings):
     smtp_password: SecretStr | None = None
     smtp_starttls: bool = True
     email_from: str = "Mentor Pilot <no-reply@mentorpilot.local>"
+    # Whether new accounts must click an emailed link before they can log in.
+    # None means "only when there is an SMTP server to send that link", so an
+    # install with no email server confirms accounts as they are created.
+    email_verification: bool | None = None
 
     @field_validator("database_url", "test_database_url")
     @classmethod
@@ -135,6 +139,12 @@ class Settings(BaseSettings):
     @property
     def secure_cookies(self) -> bool:
         return self.is_prod if self.cookie_secure is None else self.cookie_secure
+
+    @property
+    def email_verification_enabled(self) -> bool:
+        if self.email_verification is None:
+            return bool(self.smtp_host)
+        return self.email_verification
 
     @property
     def google_oauth_enabled(self) -> bool:

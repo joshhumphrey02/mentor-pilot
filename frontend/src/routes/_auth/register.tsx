@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Controller, useForm } from 'react-hook-form'
 import type { z } from 'zod'
@@ -5,7 +6,8 @@ import type { z } from 'zod'
 import { FormAlert, PasswordField, TextField } from '@/components/form/fields'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { useRegister } from '@/features/auth/api'
+import { authProvidersQueryOptions, useRegister } from '@/features/auth/api'
+import { AccountReady } from '@/features/auth/components/account-ready'
 import { AuthShell, linkClass } from '@/features/auth/components/auth-shell'
 import { CheckInbox } from '@/features/auth/components/check-inbox'
 import { GoogleButton } from '@/features/auth/components/google-button'
@@ -28,6 +30,7 @@ type RegisterValues = z.output<typeof registerSchema>
 
 function RegisterPage() {
   const signUp = useRegister()
+  const { data: providers } = useQuery(authProvidersQueryOptions)
   const {
     register,
     control,
@@ -37,6 +40,14 @@ function RegisterPage() {
     resolver: zodResolver(registerSchema) as never,
     defaultValues: { full_name: '', email: '', password: '', accept_privacy: false },
   })
+
+  if (signUp.isSuccess && providers?.email_verification === false) {
+    return (
+      <AuthShell title="You're all set" photo={PHOTOS.learnerLaptop}>
+        <AccountReady />
+      </AuthShell>
+    )
+  }
 
   if (signUp.isSuccess) {
     return (

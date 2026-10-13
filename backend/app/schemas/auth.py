@@ -37,3 +37,5 @@ class ResetPasswordRequest(BaseModel):
 
 class AuthProvidersResponse(BaseModel):
     google: bool
+    # False when accounts are confirmed as they are created (no email server).
+    email_verification: bool

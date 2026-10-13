@@ -57,7 +57,7 @@ async def register_mentor(
                 )
             )
     else:
-        await auth_service.send_verification(session, settings, mailer, user)
+        await auth_service.confirm_or_send_verification(session, settings, mailer, user)
         await session.commit()
     # The same answer either way, so this cannot be used to find accounts.
     return MessageResponse(

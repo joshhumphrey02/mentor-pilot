@@ -31,7 +31,7 @@ export const student = {
 
 const DEFAULTS: Handlers = {
   'GET /api/v1/users/me': () => apiError(401, 'not_authenticated'),
-  'GET /api/v1/auth/providers': () => json({ google: false }),
+  'GET /api/v1/auth/providers': () => json({ google: false, email_verification: true }),
   'GET /api/v1/projects': () => json([]),
 }
 

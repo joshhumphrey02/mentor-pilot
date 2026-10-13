@@ -1,10 +1,12 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 
 import { FormAlert, PasswordField, TextField } from '@/components/form/fields'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { authProvidersQueryOptions } from '@/features/auth/api'
+import { AccountReady } from '@/features/auth/components/account-ready'
 import { AuthShell, linkClass } from '@/features/auth/components/auth-shell'
 import { CheckInbox } from '@/features/auth/components/check-inbox'
 import { requireGuest } from '@/features/auth/guards'
@@ -46,8 +48,22 @@ function RegisterMentorPage() {
         }),
       ),
   })
+  const { data: providers } = useQuery(authProvidersQueryOptions)
   const ready =
     name.trim() && email.includes('@') && password.length >= 8 && expertise.length > 0 && accepted
+
+  if (signUp.isSuccess && providers?.email_verification === false) {
+    return (
+      <AuthShell title="Thanks for applying" photo={PHOTOS.soldering}>
+        <AccountReady>
+          <p className="text-sm text-muted-foreground">
+            Because mentors work with school learners, an admin reviews every mentor before they
+            can see requests.
+          </p>
+        </AccountReady>
+      </AuthShell>
+    )
+  }
 
   if (signUp.isSuccess) {
     return (

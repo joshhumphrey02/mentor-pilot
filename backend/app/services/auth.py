@@ -91,6 +91,18 @@ async def send_verification(
     )
 
 
+async def confirm_or_send_verification(
+    session: AsyncSession, settings: Settings, mailer: Mailer, user: User
+) -> None:
+    """Emails the confirmation link, or, when the server has no way to send
+    one, confirms the address on the spot so the account is not stuck."""
+    if settings.email_verification_enabled:
+        await send_verification(session, settings, mailer, user)
+    elif user.email_verified_at is None:
+        user.email_verified_at = utcnow()
+        audit.record(session, "auth.email_verified", user_id=user.id, method="automatic")
+
+
 async def register(
     session: AsyncSession,
     settings: Settings,
@@ -100,7 +112,8 @@ async def register(
     password: str,
     full_name: str,
 ) -> None:
-    """Creates an unverified account and emails a confirmation link.
+    """Creates an unverified account and emails a confirmation link (or, with
+    no email server, an account that is confirmed already).
 
     Returns nothing, and behaves the same whether or not the address is taken,
     so the endpoint cannot be used to discover who has an account.
@@ -118,7 +131,7 @@ async def register(
                 )
             )
         else:
-            await send_verification(session, settings, mailer, existing)
+            await confirm_or_send_verification(session, settings, mailer, existing)
             await session.commit()
         return
 
@@ -131,7 +144,7 @@ async def register(
     )
     session.add(user)
     await session.flush()
-    await send_verification(session, settings, mailer, user)
+    await confirm_or_send_verification(session, settings, mailer, user)
     audit.record(session, "auth.registered", user_id=user.id, method="password")
     await session.commit()
 
@@ -187,6 +200,10 @@ async def login(
             await _record_failed_login(session, settings, user)
         raise NotAuthenticatedError("Incorrect email or password.", code="invalid_credentials")
 
+    if not user.is_verified and not settings.email_verification_enabled:
+        # Signed up while links were still being emailed; none can arrive now.
+        user.email_verified_at = now
+        audit.record(session, "auth.email_verified", user_id=user.id, method="automatic")
     if not user.is_verified:
         raise AppError(
             "Please confirm your email address first. Check your inbox for the link.",

@@ -152,6 +152,51 @@ async def test_resending_verification_retires_the_previous_link(
     ).status_code == 200
 
 
+# --- With no email server -----------------------------------------------------
+
+
+@pytest.fixture
+def no_email_server(settings: Settings, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The default for an install with no SMTP host: nothing to send links with."""
+    monkeypatch.setattr(settings, "email_verification", None)
+
+
+def test_verification_follows_whether_there_is_an_email_server() -> None:
+    assert Settings(smtp_host=None, email_verification=None).email_verification_enabled is False
+    assert Settings(smtp_host="smtp.example.com").email_verification_enabled is True
+    assert Settings(smtp_host=None, email_verification=True).email_verification_enabled is True
+
+
+@pytest.mark.usefixtures("no_email_server")
+async def test_without_an_email_server_a_new_account_can_log_in_at_once(
+    client: AsyncClient, outbox: Outbox
+) -> None:
+    providers = await client.get("/api/v1/auth/providers")
+    assert providers.json()["email_verification"] is False
+
+    response = await client.post("/api/v1/auth/register", json=REGISTRATION)
+    assert response.status_code == 202
+    assert "mp_access" not in client.cookies, "registering alone must not sign you in"
+    assert outbox.messages == [], "no link is sent that could never arrive"
+
+    assert await login(client) == 200
+    me = await client.get("/api/v1/users/me")
+    assert me.json()["is_verified"] is True
+
+
+@pytest.mark.usefixtures("no_email_server")
+async def test_without_an_email_server_an_account_awaiting_a_link_is_let_in(
+    client: AsyncClient, settings: Settings, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(settings, "email_verification", True)
+    await client.post("/api/v1/auth/register", json=REGISTRATION)
+    assert await login(client) == 403
+
+    monkeypatch.setattr(settings, "email_verification", None)
+    assert await login(client, password="not the password") == 401, "still needs the password"
+    assert await login(client) == 200
+
+
 # --- Login and lockout -------------------------------------------------------
 
 
@@ -490,7 +535,7 @@ async def test_unverified_google_email_is_refused(client: AsyncClient, app: Fast
 
 
 async def test_providers_endpoint_reports_google(client: AsyncClient) -> None:
-    assert (await client.get("/api/v1/auth/providers")).json() == {"google": True}
+    assert (await client.get("/api/v1/auth/providers")).json()["google"] is True
 
 
 # --- Roles and rate limits ---------------------------------------------------

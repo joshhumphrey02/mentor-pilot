@@ -218,5 +218,5 @@ search_videos = Tool(
     args=SearchVideosArgs,
     run=_search_videos,
     status=lambda args: f"Looking for videos about {args.query}…",
-    available=lambda settings: settings.youtube_api_key is not None,
+    available=lambda settings: bool(settings.youtube_api_key),
 )

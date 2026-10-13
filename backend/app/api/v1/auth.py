@@ -57,7 +57,10 @@ def _apply(response: Response, settings: Settings, tokens: SessionTokens) -> Non
 @router.get("/providers", response_model=AuthProvidersResponse)
 async def providers(settings: SettingsDep) -> AuthProvidersResponse:
     """Which sign-in methods are configured, so the UI only offers working ones."""
-    return AuthProvidersResponse(google=settings.google_oauth_enabled)
+    return AuthProvidersResponse(
+        google=settings.google_oauth_enabled,
+        email_verification=settings.email_verification_enabled,
+    )
 
 
 @router.post(

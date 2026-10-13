@@ -1344,6 +1344,8 @@ export interface components {
         };
         /** AuthProvidersResponse */
         AuthProvidersResponse: {
+            /** Email Verification */
+            email_verification: boolean;
             /** Google */
             google: boolean;
         };
