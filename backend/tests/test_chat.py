@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai.providers.base import ProviderError
 from app.ai.providers.fake import FLAG_WORD, FakeProvider
-from app.ai.types import ChatMessage, ModerationResult
+from app.ai.types import ChatMessage, Feature, ModerationResult
 from app.core.config import Settings
 from app.core.time import utcnow
 from app.models import AIUsage, Conversation, Message, ModerationFlag, Project, User
@@ -254,6 +254,25 @@ async def test_title_falls_back_to_the_learners_words(
     assert stream[-1][1]["conversation"]["title"] == "How do I connect an LED?"
 
 
+async def test_the_input_check_can_name_the_conversation_in_the_same_call(
+    client: AsyncClient, conversation_id: str, app: FastAPI, db: AsyncSession
+) -> None:
+    class Titling(FakeProvider):
+        async def moderate(self, text: str, *, with_title: bool = False) -> ModerationResult:
+            return ModerationResult(
+                flagged=False, title="LED circuit basics" if with_title else None
+            )
+
+    provider = Titling()
+    app.state.ai.registry.register(provider)
+
+    stream = events(await send(client, conversation_id, "How do I connect an LED?"))
+
+    assert stream[-1][1]["conversation"]["title"] == "LED circuit basics"
+    assert len(provider.calls) == 1, "no separate call for the title"
+    assert [row.task for row in (await db.scalars(select(AIUsage))).all()] == ["chat"]
+
+
 async def test_only_the_first_exchange_is_titled(
     client: AsyncClient, conversation_id: str, fake_ai: FakeProvider
 ) -> None:
@@ -310,11 +329,52 @@ async def test_unsafe_output_is_replaced_before_it_is_saved(
     assert FLAG_WORD not in stored.raw
 
 
+class Filtering(FakeProvider):
+    """A provider that screens its own replies, and records what it is asked to check."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.checked: list[str] = []
+
+    def supports(self, feature: Feature) -> bool:
+        return feature == "safety_filter" or super().supports(feature)
+
+    async def moderate(self, text: str, *, with_title: bool = False) -> ModerationResult:
+        self.checked.append(text)
+        return await super().moderate(text)
+
+
+async def test_replies_filtered_by_the_provider_are_not_checked_again(
+    client: AsyncClient, conversation_id: str, app: FastAPI
+) -> None:
+    provider = Filtering()
+    app.state.ai.registry.register(provider)
+
+    message = final_message(await send(client, conversation_id, "Hello"))
+
+    assert message["status"] == "complete"
+    assert provider.checked == ["Hello"], "only the learner's message is checked"
+
+
+async def test_tool_output_is_still_checked_when_replies_are_filtered(
+    client: AsyncClient, conversation_id: str, app: FastAPI
+) -> None:
+    provider = Filtering()
+    app.state.ai.registry.register(provider)
+
+    message = final_message(await send(client, conversation_id, "An LED on a breadboard?"))
+
+    assert "circuit" in [block["type"] for block in message["blocks"]]
+    assert len(provider.checked) == 2
+    assert provider.checked[1], "the circuit's labels are checked"
+    assert "Let me show you" not in provider.checked[1], "the model's own words are not"
+
+
 async def test_moderation_outage_blocks_the_message_and_says_so(
     client: AsyncClient, conversation_id: str, app: FastAPI, db: AsyncSession
 ) -> None:
     class ModerationDown(FakeProvider):
-        async def moderate(self, text: str) -> ModerationResult:
+        async def moderate(self, text: str, *, with_title: bool = False) -> ModerationResult:
             raise ProviderError("down", code="auth")
 
     provider = ModerationDown()

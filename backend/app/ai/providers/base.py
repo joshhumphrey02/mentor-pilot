@@ -55,7 +55,14 @@ class AIProvider(Protocol):
         """
         ...
 
-    async def moderate(self, text: str) -> ModerationResult: ...
+    async def moderate(self, text: str, *, with_title: bool = False) -> ModerationResult:
+        """Checks text for content unsafe for minors.
+
+        With `with_title`, the text opens a conversation and the result may
+        also carry a title for it. Providers that cannot name it leave the
+        title as None and the caller asks for one separately.
+        """
+        ...
 
     def supports(self, feature: Feature) -> bool: ...
 

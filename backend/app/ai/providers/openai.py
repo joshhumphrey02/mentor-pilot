@@ -223,7 +223,9 @@ class OpenAIProvider:
             ),
         )
 
-    async def moderate(self, text: str) -> ModerationResult:
+    async def moderate(self, text: str, *, with_title: bool = False) -> ModerationResult:
+        # The moderation endpoint only classifies, so `with_title` is ignored
+        # and conversations are named by a separate call.
         try:
             response = await self._client.moderations.create(
                 model=self._moderation_model, input=text

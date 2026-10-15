@@ -422,3 +422,29 @@ where the tooling forced a deviation. Newest phase last.
   logging in until its cookies were deleted by hand. The client retries once.
 - **Accounts are confirmed automatically when there is no SMTP server**
   (`EMAIL_VERIFICATION` overrides). Addresses are unproven until one exists.
+
+## Fewer AI calls per turn (after the first Gemini key)
+
+The free Gemini tier allows 20 requests a day per model, and a turn used three
+or four of them: input check, reply, output check, and a title on the first
+exchange. A turn now uses two (plus one per tool round).
+
+- **Gemini replies are not moderated again after streaming.** Gemini screens
+  them itself while generating, with stricter thresholds than its defaults
+  (low and above for harassment, hate and sexual content; medium and above for
+  dangerous content, so ordinary science about batteries and heat still gets
+  through). A blocked reply ends as a refusal and becomes the usual redirect.
+  The trade-off: such a block is not recorded as an output `ModerationFlag`,
+  and Gemini's categories do not cover requests for personal information.
+  Learner input is still checked first, as before. Providers declare this
+  with the `safety_filter` feature; OpenAI and Anthropic keep the separate
+  output check.
+- **Text from tools is still checked** on Gemini (photo captions, video titles),
+  since no model wrote it and no vendor filter saw it. A reply with no tool
+  output costs no check at all.
+- **The input check names the conversation** on its first message, in the same
+  call. OpenAI's moderation endpoint cannot do this, so it still makes a
+  separate title call; so does any provider whose check returns no title.
+- **A Gemini 429 asking for a wait over a minute is a used-up quota**, reported
+  as `quota_exhausted` and not retried. Retrying it only spent three requests
+  on each failure and kept the learner waiting for an error.

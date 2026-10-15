@@ -48,6 +48,8 @@ FRIENDLY_ERRORS = {
     "unavailable": "Your mentor couldn't be reached. Please try again in a moment.",
     "not_configured": "Your mentor isn't set up yet. Please let your teacher or an admin know.",
     "auth": "Your mentor isn't set up correctly. Please let your teacher or an admin know.",
+    "quota_exhausted": "Your mentor has reached its limit for now. Please try again later, "
+    "or let your teacher know.",
 }
 DEFAULT_FRIENDLY_ERROR = "Something went wrong on our side. Please try again."
 
@@ -247,8 +249,9 @@ class AIService:
         result.text = "".join(parts)
         return result
 
-    async def moderate(self, text: str) -> ModerationResult:
-        """Checks text for content unsafe for minors.
+    async def moderate(self, text: str, *, with_title: bool = False) -> ModerationResult:
+        """Checks text for content unsafe for minors, optionally naming the
+        conversation it opens in the same call (see AIProvider.moderate).
 
         Never raises: if the check cannot be completed the result says so
         (`checked=False`), and the caller applies MODERATION_FAIL_CLOSED.
@@ -259,7 +262,7 @@ class AIService:
             provider = self.registry.get()
 
             async def call() -> ModerationResult:
-                return await provider.moderate(text)
+                return await provider.moderate(text, with_title=with_title)
 
             return await AsyncRetrying(
                 retry=retry_if_exception(_is_retryable),

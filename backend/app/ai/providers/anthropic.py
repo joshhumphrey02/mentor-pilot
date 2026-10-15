@@ -201,13 +201,13 @@ class AnthropicProvider:
             ),
         )
 
-    async def moderate(self, text: str) -> ModerationResult:
+    async def moderate(self, text: str, *, with_title: bool = False) -> ModerationResult:
         """Anthropic has no moderation endpoint, so the fast model classifies the text."""
         try:
             response = await self._client.messages.create(
                 model=self._fast_model,
                 max_tokens=256,
-                system=safety.CLASSIFIER_SYSTEM,
+                system=safety.classifier_system(with_title=with_title),
                 messages=[{"role": "user", "content": safety.classifier_prompt(text)}],
             )
         except anthropic.AnthropicError as exc:

@@ -41,6 +41,29 @@ _REFUSALS = frozenset(
     }
 )
 
+# Gemini screens replies while generating them, so the mentor's replies need no
+# separate moderation call afterwards (see `supports`). Learners are minors,
+# so the filters are stricter than Gemini's defaults. Dangerous content is a
+# step looser than the rest: school science is full of batteries, chemicals and
+# heat, and the mentor has to be able to talk about using them safely.
+_STRICT = types.HarmBlockThreshold.BLOCK_LOW_AND_ABOVE
+_SAFETY_SETTINGS = [
+    types.SafetySetting(category=types.HarmCategory.HARM_CATEGORY_HARASSMENT, threshold=_STRICT),
+    types.SafetySetting(category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold=_STRICT),
+    types.SafetySetting(
+        category=types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold=_STRICT
+    ),
+    types.SafetySetting(
+        category=types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        threshold=types.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    ),
+]
+
+# A 429 that asks us to wait longer than this is a used-up quota (the free tier
+# allows a few requests a day), not a passing burst. Retrying cannot help, and
+# every retry is another wasted request.
+_MAX_RETRY_DELAY_SECONDS = 60
+
 
 def _to_contents(messages: Sequence[ChatMessage], model: str) -> list[types.Content]:
     out: list[types.Content] = []
@@ -88,8 +111,24 @@ def _to_contents(messages: Sequence[ChatMessage], model: str) -> list[types.Cont
     return out
 
 
+def _retry_delay(exc: errors.APIError) -> float | None:
+    """The wait Gemini asks for in a 429's RetryInfo, in seconds."""
+    error = exc.details.get("error") if isinstance(exc.details, dict) else None
+    for detail in (error or {}).get("details") or []:
+        if isinstance(detail, dict) and detail.get("@type", "").endswith("RetryInfo"):
+            try:
+                return float(str(detail.get("retryDelay", "")).removesuffix("s"))
+            except ValueError:
+                return None
+    return None
+
+
 def _wrap(exc: Exception) -> ProviderError:
     if isinstance(exc, errors.APIError):
+        if exc.code == 429 and (_retry_delay(exc) or 0) > _MAX_RETRY_DELAY_SECONDS:
+            return ProviderError(
+                f"Gemini quota used up: {exc.message or ''}", code="quota_exhausted"
+            )
         # The vendor's own explanation goes to the server log, never to a learner.
         return error_from_status(
             exc.code or 500, f"Gemini returned HTTP {exc.code}: {exc.message or ''}"
@@ -118,7 +157,7 @@ class GeminiProvider:
         self._fast_model = fast_model
 
     def supports(self, feature: Feature) -> bool:
-        return feature in ("vision", "tools")
+        return feature in ("vision", "tools", "safety_filter")
 
     async def stream_chat(
         self,
@@ -149,6 +188,7 @@ class GeminiProvider:
             else None,
             # We run tools ourselves, in our own loop.
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+            safety_settings=_SAFETY_SETTINGS,
         )
 
         text: list[str] = []
@@ -233,14 +273,14 @@ class GeminiProvider:
             ),
         )
 
-    async def moderate(self, text: str) -> ModerationResult:
+    async def moderate(self, text: str, *, with_title: bool = False) -> ModerationResult:
         """Gemini has no standalone moderation endpoint, so the fast model classifies."""
         try:
             response = await self._client.aio.models.generate_content(
                 model=self._fast_model,
                 contents=safety.classifier_prompt(text),
                 config=types.GenerateContentConfig(
-                    system_instruction=safety.CLASSIFIER_SYSTEM,
+                    system_instruction=safety.classifier_system(with_title=with_title),
                     max_output_tokens=256,
                     temperature=0,
                 ),

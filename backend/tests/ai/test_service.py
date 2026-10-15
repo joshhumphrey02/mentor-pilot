@@ -240,7 +240,7 @@ async def test_moderation_flags_and_passes(ai: AIService) -> None:
 
 async def test_empty_text_is_not_sent_for_moderation(ai: AIService, app: FastAPI) -> None:
     class Exploding(FakeProvider):
-        async def moderate(self, text: str) -> ModerationResult:
+        async def moderate(self, text: str, *, with_title: bool = False) -> ModerationResult:
             raise AssertionError("should not be called")
 
     app.state.ai.registry.register(Exploding())
@@ -252,7 +252,7 @@ async def test_moderation_outage_blocks_when_failing_closed(
     ai: AIService, app: FastAPI, settings: Settings, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     class Down(FakeProvider):
-        async def moderate(self, text: str) -> ModerationResult:
+        async def moderate(self, text: str, *, with_title: bool = False) -> ModerationResult:
             raise ProviderError("down", code="unavailable", retryable=True)
 
     app.state.ai.registry.register(Down())

@@ -387,8 +387,11 @@ class ChatService:
             if assistant is None:
                 return
 
+            # Set when the input check also named the conversation.
+            title: str | None = None
             if turn.check_input:
-                verdict = await self.ai.moderate(turn.user_text)
+                verdict = await self.ai.moderate(turn.user_text, with_title=turn.needs_title)
+                title = verdict.title
                 if self.ai.blocks(verdict):
                     blocks = await self._withhold_input(session, turn, verdict)
                     for index, block in enumerate(blocks):
@@ -421,6 +424,9 @@ class ChatService:
             # The model's words plus a note of what each tool did: what a later
             # turn needs in order to know what was said and shown in this one.
             raw: list[str] = []
+            # What tools fetched from outside (photo captions, video titles):
+            # text no model wrote, so no vendor safety filter has seen it.
+            tool_blocks: list[Block] = []
             usage = Usage()
             failure: ErrorEvent | None = None
             refused = False
@@ -485,6 +491,7 @@ class ChatService:
                 for call in calls:
                     outcome = await self._call_tool(tools.get(call.name), tool_context, call, emit)
                     for block in outcome.blocks:
+                        tool_blocks.append(block)
                         relay(parser.add(block))
                     if outcome.record:
                         raw.append(f"\n\n[Record: {outcome.record}]\n\n")
@@ -515,7 +522,12 @@ class ChatService:
             elif not blocks:
                 blocks, text, status = [EMPTY_REPLY], "", MessageStatus.ERROR
             else:
-                verdict = await self.ai.moderate(visible_text(blocks))
+                # Providers that filter replies while generating them have
+                # already screened the model's words (a blocked reply arrives as
+                # `refused`), so only what tools fetched is left to check. With
+                # no tool output that is no call at all.
+                filtered = self.ai.registry.get().supports("safety_filter")
+                verdict = await self.ai.moderate(visible_text(tool_blocks if filtered else blocks))
                 if self.ai.blocks(verdict):
                     session.add(
                         ModerationFlag(
@@ -536,7 +548,7 @@ class ChatService:
             )
 
             if status is MessageStatus.COMPLETE and text:
-                await self._after_turn(session, turn, project, text, emit)
+                await self._after_turn(session, turn, project, text, title, emit)
 
     async def _after_turn(
         self,
@@ -544,11 +556,12 @@ class ChatService:
         turn: Turn,
         project: Project,
         reply: str,
+        title: str | None,
         emit: Callable[[ServerSentEvent], None],
     ) -> None:
         """Housekeeping once the learner already has their answer."""
         if turn.needs_title:
-            conversation = await self._name_conversation(session, turn, reply)
+            conversation = await self._name_conversation(session, turn, reply, title)
             if conversation is not None:
                 emit(
                     _sse(
@@ -792,11 +805,17 @@ class ChatService:
         return images
 
     async def _name_conversation(
-        self, session: AsyncSession, turn: Turn, reply: str
+        self, session: AsyncSession, turn: Turn, reply: str, title: str | None
     ) -> Conversation | None:
+        """Names a new conversation, with the title from the input check when it
+        gave one, or else with a call to the fast model."""
         conversation = await session.get(Conversation, turn.conversation_id)
         if conversation is None or conversation.title:
             return None
+        if title:
+            conversation.title = title[:TITLE_MAX_LENGTH].rstrip()
+            await session.commit()
+            return conversation
         result = await self.ai.complete(
             task="title",
             system=TITLE_SYSTEM,

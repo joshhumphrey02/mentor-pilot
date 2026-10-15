@@ -9,7 +9,9 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-Feature = Literal["vision", "tools", "image_gen"]
+# "safety_filter": the vendor screens the model's replies itself while
+# generating them, so they need no separate moderation call afterwards.
+Feature = Literal["vision", "tools", "image_gen", "safety_filter"]
 StopReason = Literal["end", "tool_calls", "max_tokens", "refusal"]
 
 
@@ -78,6 +80,9 @@ class ModerationResult(BaseModel):
     # False when the check itself could not be completed (provider down,
     # unparseable verdict). Callers decide whether that blocks the message.
     checked: bool = True
+    # A name for the conversation, when one was asked for and the checker
+    # could give one. None means the caller has to name it some other way.
+    title: str | None = None
 
 
 # --- Stream events -----------------------------------------------------------

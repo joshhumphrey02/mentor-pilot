@@ -131,7 +131,7 @@ class FakeProvider:
             message=scripted,
         )
 
-    async def moderate(self, text: str) -> ModerationResult:
+    async def moderate(self, text: str, *, with_title: bool = False) -> ModerationResult:
         flagged = FLAG_WORD in text
         return ModerationResult(flagged=flagged, categories=["harassment"] if flagged else [])
 
