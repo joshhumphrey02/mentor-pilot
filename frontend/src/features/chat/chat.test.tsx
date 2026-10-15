@@ -245,7 +245,84 @@ describe('projects', () => {
     })
     renderApp('/app/projects')
 
-    expect(await screen.findByText('Solar phone charger')).toBeInTheDocument()
+    const main = await screen.findByRole('main')
+    expect(await within(main).findByText('Solar phone charger')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'Stage 3 of 9' })).toBeInTheDocument()
+  })
+})
+
+describe('sidebar', () => {
+  const other = { ...project, id: 'p2', title: 'Rain gauge' }
+  const DELETE = `DELETE /api/v1/projects/${PROJECT_ID}`
+
+  function withProjects(handlers = {}) {
+    let projects = [project, other]
+    return workspace({
+      'GET /api/v1/projects': () => json(projects),
+      [DELETE]: () => {
+        projects = [other]
+        return new Response(null, { status: 204 })
+      },
+      ...handlers,
+    })
+  }
+
+  const sidebarProjects = async () =>
+    screen.findByRole('navigation', { name: 'Your projects' })
+
+  it('is shown in the project workspace, with every project', async () => {
+    withProjects()
+
+    const projects = await sidebarProjects()
+    expect(await within(projects).findByRole('link', { name: 'Rain gauge' })).toHaveAttribute(
+      'href',
+      '/project/p2',
+    )
+    expect(within(projects).getByRole('link', { name: 'Solar phone charger' })).toBeInTheDocument()
+  })
+
+  it('deletes a project from its menu, after asking', async () => {
+    const api = withProjects()
+    const projects = await sidebarProjects()
+
+    await userEvent.click(
+      await within(projects).findByRole('button', {
+        name: 'More options for Solar phone charger',
+      }),
+    )
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Delete project' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Delete this project?' })
+    expect(api.count(DELETE)).toBe(0)
+
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Delete project' }))
+
+    await waitFor(() => expect(api.count(DELETE)).toBe(1))
+    // It was the open project, so the learner lands on their project list.
+    await waitFor(() => expect(api.router.state.location.pathname).toBe('/app/projects'))
+    expect(await screen.findByText('“Solar phone charger” was deleted.')).toBeInTheDocument()
+    expect(
+      within(await sidebarProjects()).queryByRole('link', { name: 'Solar phone charger' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('keeps the project and says why when deleting fails', async () => {
+    const api = withProjects({ [DELETE]: () => apiError(500, 'internal', 'Could not delete.') })
+    const projects = await sidebarProjects()
+
+    await userEvent.click(
+      await within(projects).findByRole('button', {
+        name: 'More options for Solar phone charger',
+      }),
+    )
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Delete project' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Delete this project?' })
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Delete project' }))
+
+    expect(await within(dialog).findByText('Could not delete.')).toBeInTheDocument()
+    expect(api.router.state.location.pathname).toBe(`/project/${PROJECT_ID}`)
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Keep it' }))
+    expect(
+      await within(projects).findByRole('link', { name: 'Solar phone charger' }),
+    ).toBeInTheDocument()
   })
 })

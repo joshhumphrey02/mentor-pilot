@@ -4,6 +4,7 @@ import { ArrowLeftIcon, ChevronDownIcon, HistoryIcon, NotebookPenIcon, XIcon } f
 import { useCallback, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { AppSidebar } from '@/features/app-shell/app-sidebar'
 import { useUser } from '@/features/auth/api'
 import { requireOnboardedUser } from '@/features/auth/guards'
 import { type Conversation, projectQueryOptions, refreshProjects } from '@/features/chat/api'
@@ -108,11 +109,13 @@ function Workspace({ conversationId }: { conversationId: string }) {
 
   return (
     <div
-      // On wide screens the project tools sit beside the chat.
-      className="grid h-dvh grid-cols-1 overflow-hidden lg:grid-cols-[minmax(0,1fr)_24rem]"
+      // The app sidebar from `md` up, and on the widest screens the project
+      // tools beside the chat as well.
+      className="grid h-dvh grid-cols-1 overflow-hidden md:grid-cols-[15rem_minmax(0,1fr)] xl:grid-cols-[15rem_minmax(0,1fr)_24rem]"
       // While the on-screen keyboard is open this is shorter than 100dvh.
       style={viewportHeight ? { height: viewportHeight } : undefined}
     >
+    <AppSidebar />
     <div className="flex min-h-0 min-w-0 flex-col overflow-hidden">
       <header className="border-b bg-background pt-safe">
         <div className="mx-auto flex h-16 w-full max-w-3xl items-center gap-1 px-2 sm:px-4">
@@ -152,7 +155,7 @@ function Workspace({ conversationId }: { conversationId: string }) {
           <Button
             variant="ghost"
             size="icon-touch"
-            className="lg:hidden"
+            className="xl:hidden"
             aria-label="Checklist, logbook, saved items and data"
             onClick={() => setToolsOpen(true)}
           >
@@ -221,15 +224,15 @@ function Workspace({ conversationId }: { conversationId: string }) {
       </WorkspaceContext>
     </div>
 
-      <aside aria-label="Project tools" className="hidden min-h-0 border-l bg-sidebar p-4 lg:block">
+      <aside aria-label="Project tools" className="hidden min-h-0 border-l bg-sidebar p-4 xl:block">
         <WorkspaceContext value={workspace}>
           <WorkspacePanel projectId={projectId} />
         </WorkspaceContext>
       </aside>
 
-      {/* The same tools as a bottom sheet on phones and tablets. */}
+      {/* The same tools as a bottom sheet below `xl`. */}
       <Drawer open={toolsOpen} onOpenChange={setToolsOpen}>
-        <DrawerContent className="h-[88dvh] lg:hidden">
+        <DrawerContent className="h-[88dvh] xl:hidden">
           <DrawerTitle className="sr-only">Project tools</DrawerTitle>
           <DrawerDescription className="sr-only">
             Your checklist, logbook, saved items and data.

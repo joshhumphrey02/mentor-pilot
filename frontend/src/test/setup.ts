@@ -48,6 +48,11 @@ globalThis.IntersectionObserver ??= class {
   }
 }
 
+// Nor pointer capture, which bottom sheets and menus take on pointer down.
+Element.prototype.setPointerCapture ??= vi.fn()
+Element.prototype.releasePointerCapture ??= vi.fn()
+Element.prototype.hasPointerCapture ??= vi.fn(() => false)
+
 window.scrollTo = vi.fn() as unknown as typeof window.scrollTo
 // jsdom has no layout, so element scrolling is a no-op there.
 Element.prototype.scrollTo = vi.fn() as unknown as typeof Element.prototype.scrollTo

@@ -76,6 +76,25 @@ export function useCreateProject() {
   })
 }
 
+export function useDeleteProject() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (projectId: string) =>
+      unwrap(
+        await api.DELETE('/api/v1/projects/{project_id}', {
+          params: { path: { project_id: projectId } },
+        }),
+      ),
+    // Its own queries (chats, stages) are left for the caller to drop once it
+    // has navigated away: removing them under an open project page would only
+    // make that page refetch a project that is gone.
+    onSuccess: (_data, projectId) =>
+      queryClient.setQueryData(projectsQueryOptions.queryKey, (projects) =>
+        projects?.filter((project) => project.id !== projectId),
+      ),
+  })
+}
+
 export function useCreateConversation(projectId: string) {
   const queryClient = useQueryClient()
   return useMutation({

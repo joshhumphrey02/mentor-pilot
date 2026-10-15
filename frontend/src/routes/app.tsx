@@ -1,6 +1,7 @@
 import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
 
 import { Logo } from '@/components/brand/logo'
+import { AppSidebar } from '@/features/app-shell/app-sidebar'
 import { navFor } from '@/features/app-shell/nav'
 import { useUser } from '@/features/auth/api'
 import { requireOnboardedUser } from '@/features/auth/guards'
@@ -18,24 +19,7 @@ function AppLayout() {
   const items = navFor(useUser().role)
   return (
     <div className="min-h-dvh md:grid md:grid-cols-[15rem_minmax(0,1fr)]">
-      <aside className="sticky top-0 hidden h-dvh flex-col border-r bg-sidebar p-4 md:flex">
-        <Link to="/app" className="rounded-lg px-2 py-1.5" aria-label="Mentor Pilot home">
-          <Logo />
-        </Link>
-        <nav aria-label="Main" className="mt-8 grid gap-1">
-          {items.map(({ to, label, icon: Icon, exact }) => (
-            <Link
-              key={to}
-              to={to}
-              activeOptions={{ exact }}
-              className="flex h-11 items-center gap-3 rounded-xl px-3 font-medium text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[status=active]:bg-sidebar-accent data-[status=active]:text-sidebar-accent-foreground"
-            >
-              <Icon aria-hidden="true" className="size-5" />
-              {label}
-            </Link>
-          ))}
-        </nav>
-      </aside>
+      <AppSidebar />
 
       <div className="flex min-h-dvh min-w-0 flex-col">
         <header className="pt-safe md:hidden">
